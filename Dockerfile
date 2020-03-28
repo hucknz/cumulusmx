@@ -48,6 +48,9 @@ RUN \
   unzip /tmp/$CUMULUS_ZIP -d /opt && \
   chmod +x /opt/CumulusMX/CumulusMX.exe
 
+# Copy the Web Service Files into the Published Web Folder
+RUN cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/web/
+
 # Define mountable directories.
 VOLUME ["/opt/CumulusMX/data","/opt/CumulusMX/backup","/opt/CumulusMX/Reports","/var/log/nginx"]
 
