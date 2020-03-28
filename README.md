@@ -7,9 +7,9 @@ Run the following commands to prepare and start the container:
 * cd /opt/MXWeather
 * touch Cumulus.ini
 * docker build -t ubuntu:MXWeather .
-* docker run --name=MXWeather -p 8998:8998 -p 8080:80 -v /opt/MXWeather/data:/opt/CumulusMX/data -v /opt/MXWeather/backup:/opt/CumulusMX/backup -v /opt/MXWeather/log:/var/log/nginx -v /opt/MXWeather/Cumulus.ini:/opt/CumulusMX/Cumulus.ini --privileged --device=/dev/usb:/dev/usb -d ubuntu:MXWeather
+* docker run --name=MXWeather -p 8998:8998 -p 8080:80 -v /opt/MXWeather/data:/opt/CumulusMX/data -v /opt/MXWeather/backup:/opt/CumulusMX/backup -v /opt/MXWeather/log:/var/log/nginx -v /opt/MXWeather/Cumulus.ini:/opt/CumulusMX/Cumulus.ini --privileged --device=/dev:/dev -d ubuntu:MXWeather
 
 Known Issues:
 * Requires Privileged Level Access: 
-The --privileged switch is required for the --device=/dev/usb:/dev/usb mapping to work correctly. Unfortunately while CumulusMX can see the USB devices in the container, it doesn't seem to be able to open the stream with out privileged access. 
+The --privileged switch is required for the --device=/dev:/dev mapping to work correctly. Unfortunately while CumulusMX can see the USB devices in the container, it doesn't seem to be able to open the stream with out privileged access. Originally it was tried using /dev/usb:/dev/usb as the device mapping howevever although CumulusMX reported that it could both see the device, and open the stream, it never read any data back. 
 
