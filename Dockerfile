@@ -66,6 +66,10 @@ COPY ./MXWeather.conf /etc/nginx/sites-available/
 RUN ln -s /etc/nginx/sites-available/MXWeather.conf /etc/nginx/sites-enabled/MXWeather.conf && \
   rm /etc/nginx/sites-enabled/default
 
+# Redirect realtime.txt which for some reason is produced in the root folder
+RUN touch /opt/CumulusMX/realtime.txt && \
+  ln -s /opt/CumulusMX/realtime.txt /opt/CumulusMX/web/realtime.txt
+
 WORKDIR /opt/CumulusMX/
 RUN chmod +x /opt/CumulusMX/MXWeather.sh
 
