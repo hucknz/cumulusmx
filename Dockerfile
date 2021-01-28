@@ -31,7 +31,7 @@ RUN \
 
 # Install Packages
 RUN apt-get update && \
-    apt-get install -y wget tzdata unzip libudev-dev git python-virtualenv
+    apt-get install -y curl tzdata unzip libudev-dev git python3-virtualenv
 
 # Install Mono
 RUN apt-get update && \
@@ -48,14 +48,13 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Download Latest CumulusMX
 RUN \
-  LATEST_RELEASE=$(curl -L -s -H 'Accept: application/json' https://github.com/cumulusmx/CumulusMX/releases/latest) && \
-  LATEST_VERSION=$(echo $LATEST_RELEASE | sed -e 's/.*"tag_name":"\([^"]*\)".*/\1/') && \
-  CUMULUS_ZIP="CumulusMXDist${LATEST_VERSION:4,1}.zip" && \
-  ARTIFACT_URL="https://github.com/cumulusmx/CumulusMX/releases/download/$LATEST_VERSION/$CUMULUS_ZIP" && \
-  wget $ARTIFACT_URL -P /tmp && \
-  mkdir /opt/CumulusMX && \ 
-  unzip /tmp/$CUMULUS_ZIP -d /opt && \
+  curl -L $(curl -s https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest | grep browser_ | cut -d\" -f4) --output /tmp/CumulusMX.zip && \
+  mkdir /opt/CumulusMX && \
+  unzip /tmp/CumulusMX.zip -d /opt && \
   chmod +x /opt/CumulusMX/CumulusMX.exe
+
+# Test File
+COPY ./index.htm /opt/CumulusMX/web/
 
 # Copy the Web Service Files into the Published Web Folder
 RUN cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/web/
@@ -63,10 +62,7 @@ RUN cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/web/
 # Define mountable directories.
 VOLUME ["/opt/CumulusMX/data","/opt/CumulusMX/backup","/opt/CumulusMX/Reports","/var/log/nginx"]
 
-# Test File
-COPY ./index.htm /opt/CumulusMX/web/
-
-# Add Start Script
+# Add Start Script# Test File
 COPY ./MXWeather.sh /opt/CumulusMX/
 
 # Add Nginx Config
