@@ -12,7 +12,7 @@ Run the following commands to prepare and start the container:
 * `docker build -t ubuntu:MXWeather .`
 * `docker run --name=MXWeather -p 8998:8998 -p 8080:80 -v /opt/MXWeather/data:/opt/CumulusMX/data -v /opt/MXWeather/backup:/opt/CumulusMX/backup -v /opt/MXWeather/log:/var/log/nginx -v /opt/MXWeather/Cumulus.ini:/opt/CumulusMX/Cumulus.ini --device=/dev/hidraw0 -d ubuntu:MXWeather`
 
-### For non-USB Weather Stations (including FineOffset)
+### For non-USB Weather Stations (TCP, HTTP or no Station)
 Run the following commands to prepare and start the container:
 * `cd /opt/MXWeather`
 * `touch Cumulus.ini`
