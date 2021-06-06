@@ -54,7 +54,7 @@ RUN \
   chmod +x /opt/CumulusMX/CumulusMX.exe
 
 # Test File
-COPY ./index.htm /opt/CumulusMX/web/
+COPY ./overload/index.htm /opt/CumulusMX/web/
 
 # Copy the Web Service Files into the Published Web Folder
 RUN cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/web/
