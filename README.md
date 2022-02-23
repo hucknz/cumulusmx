@@ -24,6 +24,6 @@ Run the following commands to prepare and start the container:
   If you don't use this weather station (or a USB station at all) you wont need this, so remove the --device=/dev/hidraw0 from the docker run statement.
 
 ## TODO:
-* Need to build a Docker-create.yml. 
 * Stack container images.
 * Usage examples for different weather station configurations.
+* Resolve issues with INI Config handling
