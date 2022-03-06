@@ -25,5 +25,6 @@ Run the following commands to prepare and start the container:
 
 ## TODO:
 * Stack container images.
+* ~MXdiags Log Passthrough~
 * Usage examples for different weather station configurations.
 * Resolve issues with INI Config handling
