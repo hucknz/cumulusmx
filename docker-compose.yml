@@ -8,12 +8,13 @@
       - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/opt/MXWeather/data:/opt/CumulusMX/data
+      - ${ROOT}/MXWeather/data:/opt/CumulusMX/data
       - ${ROOT}/MXWeather/backup:/opt/CumulusMX/backup
       - ${ROOT}/MXWeather/log:/var/log/nginx
+      - ${ROOT}/MXWeather/MXdiags:/opt/CumulusMX/MXdiags
       - ${ROOT}/MXWeather/Cumulus.ini:/opt/CumulusMX/Cumulus.ini
-      - /tmp/Easyweather.dat:/opt/CumulusMX/Easyweather.dat           # Optional to allow for no USB device, and allows for injecting custom EasyWeather data
-      - /tmp/Easyweatherplus.dat:/opt/CumulusMX/Easyweatherplus.dat   # Optional to allow for no USB device, and allows for injecting custom EasyWeather data
+#     - /tmp/Easyweather.dat:/opt/CumulusMX/Easyweather.dat           # Required to allow for no USB device, and allows for injecting custom EasyWeather data
+#     - /tmp/Easyweatherplus.dat:/opt/CumulusMX/Easyweatherplus.dat   # Required to allow for no USB device, and allows for injecting custom EasyWeather data
     ports:
       - 8998:8998
       - 80:80
