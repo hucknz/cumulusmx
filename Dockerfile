@@ -60,7 +60,7 @@ COPY ./overload/index.htm /opt/CumulusMX/web/
 RUN cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/web/
 
 # Define mountable directories.
-VOLUME ["/opt/CumulusMX/data","/opt/CumulusMX/backup","/opt/CumulusMX/Reports","/var/log/nginx"]
+VOLUME ["/opt/CumulusMX/data","/opt/CumulusMX/backup","/opt/CumulusMX/Reports","/var/log/nginx","/opt/CumulusMX/MXdiags"]
 
 # Add Start Script# Test File
 COPY ./MXWeather.sh /opt/CumulusMX/
@@ -77,6 +77,10 @@ RUN touch /opt/CumulusMX/realtime.txt && \
 
 WORKDIR /opt/CumulusMX/
 RUN chmod +x /opt/CumulusMX/MXWeather.sh
+
+# Copy in New Executable (beta) - Uncomment to allow for injecting new manual builds of Executable
+# RUN rm -f /opt/CumulusMX/CumulusMX.exe
+# COPY ./CumulusMX.exe /opt/CumulusMX/
 
 CMD ["./MXWeather.sh"]
 
