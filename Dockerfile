@@ -60,7 +60,7 @@ COPY ./overload/index.htm /opt/CumulusMX/web/
 RUN cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/web/
 
 # Define mountable directories.
-VOLUME ["/opt/CumulusMX/data","/opt/CumulusMX/backup","/opt/CumulusMX/Reports","/var/log/nginx","/opt/CumulusMX/MXdiags"]
+VOLUME ["/opt/CumulusMX/data","/opt/CumulusMX/backup","/opt/CumulusMX/Reports","/var/log/nginx","/opt/CumulusMX/MXdiags","/opt/CumulusMX/config"]
 
 # Add Start Script# Test File
 COPY ./MXWeather.sh /opt/CumulusMX/
