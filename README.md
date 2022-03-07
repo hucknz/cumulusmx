@@ -35,7 +35,9 @@ Once the Cumulus wizard deployment is completed, the website generation can be e
 * Expand `Interval Configuration` and select `I want to use the supplied default website`
 * Save the settings
 * Expand `Interval Configuration` and verify that the normal interval settings and realtime interval settings are enabled.
+* Expand `Moon Image` and verify that `Copy Moon image file` is checked. Then update the destination folder to `./publicweb/images/moon.png`
 * Save the seittings.
+
 The `/opt/MXWeather/publicweb` folder (once the schedules are reached) will contain the public web files which can then be published online. The publicweb is published locally as well for convenience on port 80 at `http://{serveraddress}/`. The port can be changed in the build script and Dockerfile if required.
 
 ## Known Issues:
