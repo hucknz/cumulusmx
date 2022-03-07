@@ -4,15 +4,17 @@ This repo is the files required to build CumulusMX into a Docker container.
 
 ## Usage
 Ensure docker is installed and configured on the host machine
-Clone the repo into a folder (I generally use /opt/MXWeather/) on the Docker host.
+Clone the repo into a folder (I generally use `/opt/MXWeather/`) on the Docker host.
 
 ### For Standard Weather Stations (Accessed via HTTP/IP etc, or no station.)
 Run the following commands to prepare and start the container:
+* `mkdir /opt/MXWeather`
 * `cd /opt/MXWeather`
 * `./build.sh`
 
 ### For USB Weather Stations (eg. FineOffset)
 Run the following commands to prepare and start the container:
+* `mkdir /opt/MXWeather`
 * `cd /opt/MXWeather`
 * `./build-usb.sh`
 
