@@ -50,17 +50,15 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN \
   curl -L $(curl -s https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest | grep browser_ | cut -d\" -f4) --output /tmp/CumulusMX.zip && \
   mkdir /opt/CumulusMX && \
+  mkdir /opt/CumulusMX/publicweb && \
   unzip /tmp/CumulusMX.zip -d /opt && \
   chmod +x /opt/CumulusMX/CumulusMX.exe
 
-# Test File
-COPY ./overload/index.htm /opt/CumulusMX/web/
-
 # Copy the Web Service Files into the Published Web Folder
-RUN cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/web/
+RUN cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
 
 # Define mountable directories.
-VOLUME ["/opt/CumulusMX/data","/opt/CumulusMX/backup","/opt/CumulusMX/Reports","/var/log/nginx","/opt/CumulusMX/MXdiags","/opt/CumulusMX/config"]
+VOLUME ["/opt/CumulusMX/data","/opt/CumulusMX/backup","/opt/CumulusMX/Reports","/var/log/nginx","/opt/CumulusMX/MXdiags","/opt/CumulusMX/config","/opt/CumulusMX/publicweb"]
 
 # Add Start Script# Test File
 COPY ./MXWeather.sh /opt/CumulusMX/
@@ -70,10 +68,6 @@ COPY ./nginx.conf /etc/nginx/
 COPY ./MXWeather.conf /etc/nginx/sites-available/
 RUN ln -s /etc/nginx/sites-available/MXWeather.conf /etc/nginx/sites-enabled/MXWeather.conf && \
   rm /etc/nginx/sites-enabled/default
-
-# Redirect realtime.txt which for some reason is produced in the root folder
-RUN touch /opt/CumulusMX/realtime.txt && \
-  ln -s /opt/CumulusMX/realtime.txt /opt/CumulusMX/web/realtime.txt
 
 WORKDIR /opt/CumulusMX/
 RUN chmod +x /opt/CumulusMX/MXWeather.sh
