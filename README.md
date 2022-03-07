@@ -14,7 +14,7 @@ Run the following commands to prepare and start the container:
 ### For USB Weather Stations (eg. FineOffset)
 Run the following commands to prepare and start the container:
 * `cd /opt/MXWeather`
-* `./build-nousb.sh`
+* `./build-usb.sh`
 
 ### First Run
 On the first run of CumulusMX the Installation wizard will need to be run. This can be started by navigating to the following `http://{serveraddress}:8998/wizard.html`
@@ -25,11 +25,14 @@ When the container is restarted, the Cumulus.ini file will be copied back to the
 Note: config changes won't be committed to the INI file outside the container unless the container receives a SIGTERM. The config file is persistent inside the container until the container is rebuilt or updated.
 
 ## Known Issues:
-* If a /dev/hidraw0 device is not present the service will fail to start. This was added to the ./update.sh to support the FineOffset weather station I use. 
-  If you don't use this weather station (or a USB station at all) you wont need this, so remove the --device=/dev/hidraw0 from the docker run statement.
+* If using the USB build and '/dev/hidraw0' device is not present the container will fail to start. This was added to the ./build-usb.sh to support the FineOffset weather station I used to use. 
+  If you don't use this weather station (or a USB station at all) you wont need this, in which case, use the 'build.sh' build script.
 
 ## TODO:
 * Stack container images.
-* ~MXdiags Log Passthrough~
+* Publish in the DockerHub
 * Usage examples for different weather station configurations.
+ 
+## Resolved:
+* ~MXdiags Log Passthrough~
 * ~Resolve issues with INI Config handling~
