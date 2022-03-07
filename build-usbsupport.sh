@@ -7,7 +7,7 @@ docker run --name=MXWeather -p 8998:8998 -p 8080:80 \
   -v /opt/MXWeather/backup:/opt/CumulusMX/backup \
   -v /opt/MXWeather/log:/var/log/nginx \
   -v /opt/MXWeather/MXdiags:/opt/CumulusMX/MXdiags \
-  -v /opt/MXWeather/Cumulus.ini:/opt/CumulusMX/Cumulus.ini \
+  -v /opt/MXWeather/config:/opt/CumulusMX/config \
   --device=/dev/hidraw0  \
   -d ubuntu:MXWeather
-docker restart MXWeather
+docker stop MXWeather && sleep 5 && docker start MXWeather
