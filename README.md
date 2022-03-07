@@ -17,10 +17,11 @@ Run the following commands to prepare and start the container:
 * `./build-nousb.sh`
 
 ### First Run
-On the first run of CumulusMX the Installation wizard will need to be run. This can be started by navigating to the following http://{serveraddress}:8998/wizard.html
+On the first run of CumulusMX the Installation wizard will need to be run. This can be started by navigating to the following `http://{serveraddress}:8998/wizard.html`
 Once the wizard is completed, you will be prompted to restart CumulusNX. Restart the container using the command `docker restart MXWeather`
-The restart will prompt the Cumulus.ini file to be written. At shutdown of the service, the Cumulus.ini file will be copied to the /config folder.
-When the container is restarted, the Cumulus.ini file will be copied back to the /opt/CumulusMX directory from the /opt/CumulusMX/config folder.
+The restart will prompt the `Cumulus.ini` file to be written. At shutdown of the service, the Cumulus.ini file will be copied to the `/config` folder.
+When the container is restarted, the Cumulus.ini file will be copied back to the `/opt/CumulusMX` directory from the `/opt/CumulusMX/config` folder.
+
 Note: config changes won't be committed to the INI file outside the container unless the container receives a SIGTERM. The config file is persistent inside the container until the container is rebuilt or updated.
 
 ## Known Issues:
@@ -31,4 +32,4 @@ Note: config changes won't be committed to the INI file outside the container un
 * Stack container images.
 * ~MXdiags Log Passthrough~
 * Usage examples for different weather station configurations.
-* Resolve issues with INI Config handling
+* ~Resolve issues with INI Config handling~
