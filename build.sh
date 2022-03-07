@@ -8,6 +8,6 @@ docker run --name=MXWeather -p 8998:8998 -p 8080:80 \
   -v /opt/MXWeather/log:/var/log/nginx \
   -v /opt/MXWeather/MXdiags:/opt/CumulusMX/MXdiags \
   -v /opt/MXWeather/config:/opt/CumulusMX/config \
-  -v /opt/MXWeabter/publicweb:/opt/CumulusMX/publicweb \
+  -v /opt/MXWeather/publicweb:/opt/CumulusMX/publicweb \
   -d ubuntu:MXWeather
 docker stop MXWeather && sleep 5 && docker start MXWeather
