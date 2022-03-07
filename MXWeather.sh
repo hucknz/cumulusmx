@@ -4,7 +4,7 @@
 service nginx start
 
 # Copy Web Support Files
-cp /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
+cp -n /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
 
 set -x
 pid=0
