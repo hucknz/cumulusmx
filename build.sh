@@ -10,4 +10,5 @@ docker run --name=MXWeather -p 8998:8998 -p 8080:80 \
   -v /opt/MXWeather/config:/opt/CumulusMX/config \
   -v /opt/MXWeather/publicweb:/opt/CumulusMX/publicweb \
   -d ubuntu:MXWeather
+cp -n /opt/MXWeather/overload/favicon.ico /opt/MXWeather/publicweb/
 docker stop MXWeather && sleep 5 && docker start MXWeather
