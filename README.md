@@ -3,21 +3,25 @@
 This repo is the files required to build CumulusMX into a Docker container.
 
 ## Usage
+Ensure docker is installed and configured on the host machine
 Clone the repo into a folder (I generally use /opt/MXWeather/) on the Docker host.
 
-### For USB Weather Stations (including FineOffset)
+### For Standard Weather Stations (Accessed via HTTP/IP etc, or no station.)
 Run the following commands to prepare and start the container:
 * `cd /opt/MXWeather`
-* `touch Cumulus.ini`
-* `docker build -t ubuntu:MXWeather .`
-* `docker run --name=MXWeather -p 8998:8998 -p 8080:80 -v /opt/MXWeather/data:/opt/CumulusMX/data -v /opt/MXWeather/backup:/opt/CumulusMX/backup -v /opt/MXWeather/log:/var/log/nginx -v /opt/MXWeather/Cumulus.ini:/opt/CumulusMX/Cumulus.ini --device=/dev/hidraw0 -d ubuntu:MXWeather`
+* `./build.sh`
 
-### For non-USB Weather Stations (TCP, HTTP or no Station)
+### For USB Weather Stations (eg. FineOffset)
 Run the following commands to prepare and start the container:
 * `cd /opt/MXWeather`
-* `touch Cumulus.ini`
-* `docker build -t ubuntu:MXWeather .`
-* `docker run --name=MXWeather -p 8998:8998 -p 8080:80 -v /opt/MXWeather/data:/opt/CumulusMX/data -v /opt/MXWeather/backup:/opt/CumulusMX/backup -v /opt/MXWeather/log:/var/log/nginx -v /opt/MXWeather/Cumulus.ini:/opt/CumulusMX/Cumulus.ini -d ubuntu:MXWeather`
+* `./build-nousb.sh`
+
+### First Run
+On the first run of CumulusMX the Installation wizard will need to be run. This can be started by navigating to the following http://{serveraddress}:8998/wizard.html
+Once the wizard is completed, you will be prompted to restart CumulusNX. Restart the container using the command `docker restart MXWeather`
+The restart will prompt the Cumulus.ini file to be written. At shutdown of the service, the Cumulus.ini file will be copied to the /config folder.
+When the container is restarted, the Cumulus.ini file will be copied back to the /opt/CumulusMX directory from the /opt/CumulusMX/config folder.
+Note: config changes won't be committed to the INI file outside the container unless the container receives a SIGTERM. The config file is persistent inside the container until the container is rebuilt or updated.
 
 ## Known Issues:
 * If a /dev/hidraw0 device is not present the service will fail to start. This was added to the ./update.sh to support the FineOffset weather station I use. 
