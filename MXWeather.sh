@@ -1,5 +1,10 @@
 #!/bin/bash
+
+# Start nginx web server
 service nginx start
+
+# Copy Web Support Files
+cp /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
 
 set -x
 pid=0
