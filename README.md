@@ -26,6 +26,18 @@ When the container is restarted, the Cumulus.ini file will be copied back to the
 
 Note: config changes won't be committed to the INI file outside the container unless the container receives a SIGTERM. The config file is persistent inside the container until the container is rebuilt or updated.
 
+### Public Website Generation
+Once the Cumulus wizard deployment is completed, the website generation can be enabled. Once enabled, realtime/interval web pages will be rendered and available outside the container in the `./publicweb` folder. To enable this generation:
+* Navigate to `http://{serveraddress}:8998/`
+* Select `Settings | Internet Settings` from the menu
+* Expand `Web/FTP Site` and select `Enable file copy of standard files`
+* Set the Local copy destination folder path to `./publicweb/`
+* Expand `Interval Configuration` and select `I want to use the supplied default website`
+* Save the settings
+* Expand `Interval Configuration` and verify that the normal interval settings and realtime interval settings are enabled.
+* Save the seittings.
+The `/opt/MXWeather/publicweb` folder (once the schedules are reached) will contain the public web files which can then be published online. The publicweb is published locally as well for convenience on port 80 at `http://{serveraddress}/`. The port can be changed in the build script and Dockerfile if required.
+
 ## Known Issues:
 * If using the USB build and `/dev/hidraw0` device is not present the container will fail to start. This was added to the `./build-usbsupport.sh` to support the FineOffset weather station I used to use. 
   If you don't use this weather station (or a USB station at all) you wont need this, in which case, use the `build.sh` build script.
