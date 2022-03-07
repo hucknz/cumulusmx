@@ -25,8 +25,8 @@ When the container is restarted, the Cumulus.ini file will be copied back to the
 Note: config changes won't be committed to the INI file outside the container unless the container receives a SIGTERM. The config file is persistent inside the container until the container is rebuilt or updated.
 
 ## Known Issues:
-* If using the USB build and '/dev/hidraw0' device is not present the container will fail to start. This was added to the ./build-usb.sh to support the FineOffset weather station I used to use. 
-  If you don't use this weather station (or a USB station at all) you wont need this, in which case, use the 'build.sh' build script.
+* If using the USB build and `/dev/hidraw0` device is not present the container will fail to start. This was added to the `./build-usb.sh` to support the FineOffset weather station I used to use. 
+  If you don't use this weather station (or a USB station at all) you wont need this, in which case, use the `build.sh` build script.
 
 ## TODO:
 * Stack container images.
