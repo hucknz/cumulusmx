@@ -13,6 +13,7 @@
       - ${ROOT}/MXWeather/log:/var/log/nginx
       - ${ROOT}/MXWeather/MXdiags:/opt/CumulusMX/MXdiags
       - ${ROOT}/MXWeather/config:/opt/CumulusMX/config
+      - ${ROOT}/MXWeather/publicweb:/opt/CumulusMX/publicweb
 #     - /tmp/Easyweather.dat:/opt/CumulusMX/Easyweather.dat           # Required to allow for no USB device, and allows for injecting custom EasyWeather data
 #     - /tmp/Easyweatherplus.dat:/opt/CumulusMX/Easyweatherplus.dat   # Required to allow for no USB device, and allows for injecting custom EasyWeather data
     ports:
