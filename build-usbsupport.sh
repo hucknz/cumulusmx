@@ -1,7 +1,7 @@
 #!/bin/bash
 cd /opt/MXWeather
 docker stop MXWeather && docker rm MXWeather
-docker build -t ubuntu:MXWeather .
+docker build -t ubuntu:MXWeather . --build-arg CACHEBUST=$(date +%s)
 docker run --name=MXWeather -p 8998:8998 -p 80:80 \
   -v /opt/MXWeather/data:/opt/CumulusMX/data \
   -v /opt/MXWeather/backup:/opt/CumulusMX/backup \
