@@ -10,7 +10,7 @@
 # Weather data, logs, and settings are persistent outside of the container
 
 # Pull base image.
-FROM ubuntu
+FROM ubuntu:20.04
 LABEL Maintainer="Optoisolated"
 
 # Config Info
