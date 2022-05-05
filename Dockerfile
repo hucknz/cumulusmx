@@ -63,8 +63,6 @@ RUN ln -s /etc/nginx/sites-available/MXWeather.conf /etc/nginx/sites-enabled/MXW
 ARG CACHEBUST=1
 RUN \
   curl -L $(curl -s https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest | grep browser_ | cut -d\" -f4) --output /tmp/CumulusMX.zip && \
-  mkdir /opt/CumulusMX && \
-  mkdir /opt/CumulusMX/publicweb && \
   unzip /tmp/CumulusMX.zip -d /opt && \
   chmod +x /opt/CumulusMX/CumulusMX.exe
 
