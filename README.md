@@ -52,3 +52,4 @@ The `/opt/MXWeather/publicweb` folder (once the schedules are reached) will cont
 ## Resolved:
 * ~MXdiags Log Passthrough~
 * ~Resolve issues with INI Config handling~
+* ~Template persistence~

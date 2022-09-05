@@ -6,8 +6,17 @@
 # Note: in order to prevent docker from turning Cumulus.ini into a folder, you need to touch it first
 # eg. touch /opt/MXWeather/Cumulus.ini
 # To build:  docker build -t ubuntu:MXWeather .
-# To run:    docker run --name=MXWeather -p 8998:8998 -p 8080:80 -v /opt/MXWeather/data:/opt/CumulusMX/data -v /opt/MXWeather/backup:/opt/CumulusMX/backup -v /opt/MXWeather/log:/var/log/nginx -v /opt/MXWeather/Cumulus.ini:/opt/CumulusMX/Cumulus.ini --device=/dev/hidraw0 -d ubuntu:MXWeather
-# Weather data, logs, and settings are persistent outside of the container
+# To run:    docker run --name=MXWeather -p 8998:8998 -p 8080:80 -v /opt/MXWeather/data:/opt/CumulusMX/data 
+#                       -v /opt/MXWeather/backup:/opt/CumulusMX/backup -v /opt/MXWeather/log:/var/log/nginx 
+#                       -v /opt/MXWeather/Cumulus.ini:/opt/CumulusMX/Cumulus.ini -d ubuntu:MXWeather
+#
+# To allow USB Weather Station Support (eg. FineOffset), add the following switch to the run command.
+#            --device=/dev/hidraw0 
+#            hidraw0 would be the USB device as shown on the host machines /dev/hidraw* list. 
+#            If you have more than one USB device, you may need to change the number at the end
+#            to the correct USB device ID. (eg. hidraw0, hidraw1, hidraw2)
+
+# Weather data, logs, templates, and settings are persistent outside of the container
 
 # Pull base image.
 FROM ubuntu:20.04
@@ -17,13 +26,6 @@ LABEL Maintainer="Optoisolated"
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Australia/Brisbane
 SHELL ["/bin/bash", "-c"]
-
-# Define mountable directories.
-VOLUME ["/opt/CumulusMX/data","/opt/CumulusMX/backup","/opt/CumulusMX/Reports","/var/log/nginx","/opt/CumulusMX/MXdiags","/opt/CumulusMX/config","/opt/CumulusMX/publicweb"]
-
-# Expose ports.
-EXPOSE 80
-EXPOSE 8998
 
 # Install Nginx.
 RUN \
@@ -49,9 +51,34 @@ RUN echo "deb http://download.mono-project.com/repo/ubuntu bionic/snapshots/5.20
     apt-get update && \
     apt-get install -y mono-devel ca-certificates-mono fsharp mono-vbnc nuget && \
     rm -rf /var/lib/apt/lists/*
-  
+
 # Configure TZData
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Ensure CumulusMX Updates are acutally downloaded, and not cached
+ARG CACHEBUST=1
+
+# Download Latest CumulusMX
+RUN \
+  curl -L $(curl -s https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest | grep browser_ | cut -d\" -f4) --output /tmp/CumulusMX.zip && \
+  mkdir /opt/CumulusMX && \
+  mkdir /opt/CumulusMX/publicweb && \
+  unzip /tmp/CumulusMX.zip -d /opt && \
+  chmod +x /opt/CumulusMX/CumulusMX.exe
+
+# Save Template files prior to mounting web folder
+RUN \
+  mkdir /tmp/web && \
+  cp -R /opt/CumulusMX/web/* /tmp/web/
+
+# Define mountable directories.
+VOLUME ["/opt/CumulusMX/data","/opt/CumulusMX/backup","/opt/CumulusMX/Reports","/var/log/nginx","/opt/CumulusMX/MXdiags","/opt/CumulusMX/publicweb","/opt/CumulusMX/web"]
+
+# Copy the Web Service Files into the Published Web Folder
+RUN cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
+
+# Add Start Script# Test File
+COPY ./MXWeather.sh /opt/CumulusMX/
 
 # Add Nginx Config
 COPY ./nginx.conf /etc/nginx/
@@ -59,24 +86,11 @@ COPY ./MXWeather.conf /etc/nginx/sites-available/
 RUN ln -s /etc/nginx/sites-available/MXWeather.conf /etc/nginx/sites-enabled/MXWeather.conf && \
   rm /etc/nginx/sites-enabled/default
 
-# Download Latest CumulusMX
-ARG CACHEBUST=1
-RUN \
-  curl -L $(curl -s https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest | grep browser_ | cut -d\" -f4) --output /tmp/CumulusMX.zip && \
-  unzip /tmp/CumulusMX.zip -d /opt && \
-  chmod +x /opt/CumulusMX/CumulusMX.exe
-
-# Add Start Script# Test File
-COPY ./MXWeather.sh /opt/CumulusMX/
-
 WORKDIR /opt/CumulusMX/
 RUN chmod +x /opt/CumulusMX/MXWeather.sh
 
-# Copy in New Executable (beta) - Uncomment to allow for injecting new manual builds of Executable
-# RUN rm -f /opt/CumulusMX/CumulusMX.exe
-# COPY ./CumulusMX.exe /opt/CumulusMX/
-
 CMD ["./MXWeather.sh"]
 
-# How to bail
-#STOPSIGNAL SIGTERM
+# Expose ports.
+EXPOSE 80
+EXPOSE 8998

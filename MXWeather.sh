@@ -6,6 +6,9 @@ service nginx start
 # Copy Web Support Files
 cp -Rn /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
 
+# Copy Public Web Templates
+cp -Rn /tmp/web/* /opt/CumulusMX/web/
+
 set -x
 pid=0
 
