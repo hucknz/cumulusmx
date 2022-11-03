@@ -15,6 +15,8 @@
       - ${DOCKERCONFDIR}/mxweather/config:/opt/CumulusMX/config
       - ${DOCKERCONFDIR}/mxweather/publicweb:/opt/CumulusMX/publicweb
       - ${DOCKERCONFDIR}/mxweather/templates:/opt/CumulusMX/web
+    devices:
+      - /dev/hidraw0:/dev/hidraw0
     ports:
       - 8998:8998
       - 8009:80
