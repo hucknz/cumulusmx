@@ -1,15 +1,15 @@
 #!/bin/bash
-cd /opt/MXWeather
-docker stop MXWeather && docker rm MXWeather
-docker build -t ubuntu:MXWeather . --build-arg CACHEBUST=$(date +%s)
-docker run --name=MXWeather -p 8998:8998 -p 80:80 \
-  -v /opt/MXWeather/data:/opt/CumulusMX/data \
-  -v /opt/MXWeather/backup:/opt/CumulusMX/backup \
-  -v /opt/MXWeather/log:/var/log/nginx \
-  -v /opt/MXWeather/MXdiags:/opt/CumulusMX/MXdiags \
-  -v /opt/MXWeather/config:/opt/CumulusMX/config \
-  -v /opt/MXWeather/publicweb:/opt/CumulusMX/publicweb \
-  -v /opt/MXWeather/templates:/opt/CumulusMX/web \
-  -d ubuntu:MXWeather
-cp -n /opt/MXWeather/overload/favicon.ico /opt/MXWeather/publicweb/
-docker stop MXWeather && sleep 5 && docker start MXWeather
+cd /.config/appdata/mxweather/
+docker stop mxweather && docker rm mxweather
+docker build -t ubuntu:mxweather . --build-arg CACHEBUST=$(date +%s)
+docker run --name=mxweather -p 8998:8998 -p 80:80 \
+  -v /.config/appdata/mxweather/data:/opt/CumulusMX/data \
+  -v /.config/appdata/mxweather/backup:/opt/CumulusMX/backup \
+  -v /.config/appdata/mxweather/log:/var/log/nginx \
+  -v /.config/appdata/mxweather/MXdiags:/opt/CumulusMX/MXdiags \
+  -v /.config/appdata/mxweather/config:/opt/CumulusMX/config \
+  -v /.config/appdata/mxweather/publicweb:/opt/CumulusMX/publicweb \
+  -v /.config/appdata/mxweather/templates:/opt/CumulusMX/web \
+  -d ubuntu:mxweather
+cp -n /.config/appdata/mxweather/overload/favicon.ico /.config/appdata/mxweather/publicweb/
+docker stop mxweather && sleep 5 && docker start mxweather

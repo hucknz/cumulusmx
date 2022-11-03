@@ -1,22 +1,20 @@
   MXWeather:
-    container_image: MXWeather
-    image: ubuntu:MXWeather
-    restart: ${RESTARTMODE}
+    container_image: mxweather
+    image: ubuntu:mxweather
+    restart: unless-stopped
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/MXWeather/data:/opt/CumulusMX/data
-      - ${ROOT}/MXWeather/backup:/opt/CumulusMX/backup
-      - ${ROOT}/MXWeather/log:/var/log/nginx
-      - ${ROOT}/MXWeather/MXdiags:/opt/CumulusMX/MXdiags
-      - ${ROOT}/MXWeather/config:/opt/CumulusMX/config
-      - ${ROOT}/MXWeather/publicweb:/opt/CumulusMX/publicweb
-      - ${ROOT}/MXWeather/templates:/opt/CumulusMX/web
-#     - /tmp/Easyweather.dat:/opt/CumulusMX/Easyweather.dat           # Required to allow for no USB device, and allows for injecting custom EasyWeather data
-#     - /tmp/Easyweatherplus.dat:/opt/CumulusMX/Easyweatherplus.dat   # Required to allow for no USB device, and allows for injecting custom EasyWeather data
+      - ${DOCKERCONFDIR}/mxweather/data:/opt/CumulusMX/data
+      - ${DOCKERCONFDIR}/mxweather/backup:/opt/CumulusMX/backup
+      - ${DOCKERCONFDIR}/mxweather/log:/var/log/nginx
+      - ${DOCKERCONFDIR}/mxweather/MXdiags:/opt/CumulusMX/MXdiags
+      - ${DOCKERCONFDIR}/mxweather/config:/opt/CumulusMX/config
+      - ${DOCKERCONFDIR}/mxweather/publicweb:/opt/CumulusMX/publicweb
+      - ${DOCKERCONFDIR}/mxweather/templates:/opt/CumulusMX/web
     ports:
       - 8998:8998
-      - 80:80
+      - 8009:80
