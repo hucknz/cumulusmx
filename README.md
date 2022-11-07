@@ -4,7 +4,7 @@
 1. Ensure Docker is installed and configured on the host machine (I recommend using DockSTARTer if you want an easy way to learn Docker)
 2. Clone the docker-compose.yml and .env files to your local machine
 3. Modify the .env file to suit your environment
-4. Important: If you're not using USB passthrough make sure to remove the "devices:" section from the docker-compose.yml file
+4. Important: If you're not using USB passthrough make sure to remove the "devices" section from the docker-compose.yml file (see Known Issues)
 5. Run `docker compose up` to start the container
 
 ## First Run
@@ -15,8 +15,7 @@
 Note: config changes won't be committed to the INI file outside the container unless the container receives a SIGTERM. The config file is persistent inside the container until the container is rebuilt or updated.
 
 ## Known Issues:
-* If using the USB build and `/dev/hidraw0` device is not present the container will fail to start. This was added to the `./build-usbsupport.sh` to support the FineOffset weather station I used to use. 
-  If you don't use this weather station (or a USB station at all) you wont need this, in which case, use the `build.sh` build script.
+* If using the USB build and `/dev/hidraw0` device is not present the container will fail to start.
 
 # Thanks
 
