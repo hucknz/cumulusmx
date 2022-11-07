@@ -2,7 +2,7 @@ name: Check for new release
 
 on:
   schedule:
-    - cron:  '16 * * * *'
+    - cron:  '7 * * * *'
 
 jobs:
   get-version:
