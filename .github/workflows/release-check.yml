@@ -1,0 +1,27 @@
+name: Check for new release
+
+on:
+  schedule:
+    - cron:  '16 * * * *'
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PAT }}
+      - name: Fetch release version
+        run: |
+          curl -sL https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest | \
+          jq -r ".tag_name" > upstream-releases/cumulusmx-latest.txt
+      - name: Check for modified files
+        id: git-check
+        run: echo ::set-output name=modified::$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")
+      - name: Commit latest release version
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          git config --global user.name 'hucknz'
+          git config --global user.email '12265772+hucknz@users.noreply.github.com'
+          git commit -am "New release version"
+          git push
