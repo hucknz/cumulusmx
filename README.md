@@ -20,4 +20,4 @@ Note: config changes won't be committed to the INI file outside the container un
 
 # Thanks
 
-All credit goes to @optoisolated for their work in containerising Cumulus MX and providing helpful documentation. 
+All credit goes to [@optoisolated](https://github.com/optoisolated/MXWeather) for their work in containerising Cumulus MX and providing helpful documentation. 
