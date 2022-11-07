@@ -1,5 +1,8 @@
 # Cumulus MX Weather Station app
 
+## Overview
+Cumulus MX is a cross platform version of Cumulus software that runs on Microsoft Windows, all varieties of UNIX and Linux (including the Raspberry Pi Operating System), and Mac OS X. Learn more here: https://www.cumuluswiki.org/a/Main_Page
+
 ## Usage
 1. Ensure Docker is installed and configured on the host machine (I recommend using DockSTARTer if you want an easy way to learn Docker)
 2. Clone the docker-compose.yml and .env files to your local machine
@@ -16,6 +19,9 @@ Note: config changes won't be committed to the INI file outside the container un
 
 ## Known Issues:
 * If using the USB build and `/dev/hidraw0` device is not present the container will fail to start.
+
+# Container builds
+The upstream repo for Cumulus MX is checked daily for new releases. When a new release is identified the build process should automatically trigger and commit a new build to https://hub.docker.com/r/hucknz/cumulusmx
 
 # Thanks
 
