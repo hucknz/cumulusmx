@@ -1,6 +1,6 @@
   MXWeather:
-    container_image: mxweather
-    image: ubuntu:mxweather
+    container_image: cumulusmx
+    image: hucknz/cumulusmx
     restart: unless-stopped
     environment:
       - PUID=${PUID}
