@@ -1,14 +1,12 @@
 #
 # MXWeather Dockerfile
 #
-# https://github.com/Optoisolated/MXWeather
+# Thanks to https://github.com/Optoisolated/MXWeather
 #
-# Note: in order to prevent docker from turning Cumulus.ini into a folder, you need to touch it first
-# eg. touch /opt/MXWeather/Cumulus.ini
-# To build:  docker build -t ubuntu:MXWeather .
-# To run:    docker run --name=MXWeather -p 8998:8998 -p 8080:80 -v /opt/MXWeather/data:/opt/CumulusMX/data
-#                       -v /opt/MXWeather/backup:/opt/CumulusMX/backup -v /opt/MXWeather/log:/var/log/nginx
-#                       -v /opt/MXWeather/Cumulus.ini:/opt/CumulusMX/Cumulus.ini -d ubuntu:MXWeather
+# Notes: 
+#
+# In order to prevent docker from turning Cumulus.ini into a folder, you need to touch it first
+# eg. touch ${DOCKERCONFDIR}/cumulusmx/Cumulus.ini
 #
 # To allow USB Weather Station Support (eg. FineOffset), add the following switch to the run command.
 #            --device=/dev/hidraw0
@@ -20,11 +18,11 @@
 
 # Pull base image.
 FROM ubuntu:20.04
-LABEL Maintainer="Optoisolated"
+LABEL Maintainer="hucknz"
 
 # Config Info
 ARG DEBIAN_FRONTEND=noninteractive
-ENV TZ=Pacific/Auckland
+ENV TZ=ETC/UTC
 SHELL ["/bin/bash", "-c"]
 
 # Install Nginx.
