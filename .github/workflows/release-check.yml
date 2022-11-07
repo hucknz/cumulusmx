@@ -2,7 +2,7 @@ name: Check for new release
 
 on:
   schedule:
-    - cron:  '*/15 * * * *'
+    - cron:  '17 * * * *'
 
 jobs:
   get-version:
@@ -23,5 +23,5 @@ jobs:
         run: |
           git config --global user.name 'hucknz'
           git config --global user.email '12265772+hucknz@users.noreply.github.com'
-          git commit -am "New release version"
+          git commit -am "New release version found"
           git push
