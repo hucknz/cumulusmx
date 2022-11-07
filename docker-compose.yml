@@ -8,13 +8,13 @@
       - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${DOCKERCONFDIR}/mxweather/data:/opt/CumulusMX/data
-      - ${DOCKERCONFDIR}/mxweather/backup:/opt/CumulusMX/backup
-      - ${DOCKERCONFDIR}/mxweather/log:/var/log/nginx
-      - ${DOCKERCONFDIR}/mxweather/MXdiags:/opt/CumulusMX/MXdiags
-      - ${DOCKERCONFDIR}/mxweather/config:/opt/CumulusMX/config
-      - ${DOCKERCONFDIR}/mxweather/publicweb:/opt/CumulusMX/publicweb
-      - ${DOCKERCONFDIR}/mxweather/templates:/opt/CumulusMX/web
+      - ${DOCKERCONFDIR}/cumulusmx/data:/opt/CumulusMX/data
+      - ${DOCKERCONFDIR}/cumulusmx/backup:/opt/CumulusMX/backup
+      - ${DOCKERCONFDIR}/cumulusmx/log:/var/log/nginx
+      - ${DOCKERCONFDIR}/cumulusmx/MXdiags:/opt/CumulusMX/MXdiags
+      - ${DOCKERCONFDIR}/cumulusmx/config:/opt/CumulusMX/config
+      - ${DOCKERCONFDIR}/cumulusmx/publicweb:/opt/CumulusMX/publicweb
+      - ${DOCKERCONFDIR}/cumulusmx/templates:/opt/CumulusMX/web
     devices:
       - /dev/hidraw0:/dev/hidraw0
     ports:
