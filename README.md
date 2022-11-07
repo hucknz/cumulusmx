@@ -7,7 +7,7 @@
 4. Important: If you're not using USB passthrough make sure to remove the "devices:" section from the docker-compose.yml file
 5. Run `docker compose up` to start the container
 
-### First Run
+## First Run
 1. On the first run of CumulusMX the Installation wizard will need to be run. This can be started by navigating to the following `http://{serveraddress}:8998/wizard.html`
 2. Once the wizard is completed, you will be prompted to restart CumulusNX. Restart the container using the command `docker restart MXWeather`
 3. The restart will prompt the `Cumulus.ini` file to be written. At shutdown of the service, the Cumulus.ini file will be copied to the `./config` folder. When the container is restarted, the Cumulus.ini file will be copied back to the `/opt/CumulusMX` directory from the `/opt/CumulusMX/config` folder.
