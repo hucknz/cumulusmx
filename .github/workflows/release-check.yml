@@ -2,10 +2,7 @@ name: Check for new release
 
 on:
   schedule:
-    - cron:  '33 * * * *'
-  push:
-    branches:
-      - master
+    - cron:  '*/15 * * * *'
 
 jobs:
   get-version:
