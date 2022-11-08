@@ -24,7 +24,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get latest version number
-        run: echo "BUILD_RELEASE_VERSION=$(cat 'upstream-releases/*')" >> $GITHUB_ENV
+          run: |
+            VER=$(cat upstream-releases/*)
+            echo "VERSION=$VER" >> $GITHUB_ENV
         
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -42,7 +44,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: hucknz/cumulusmx:latest, hucknz/cumulusmx:${{ BUILD_RELEASE_VERSION }}
+          tags: hucknz/cumulusmx:latest, hucknz/cumulusmx:${{ env.VERSION }}
 
       - name: Send workflow result to Slack
         id: slack
