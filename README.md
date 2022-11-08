@@ -12,13 +12,13 @@ Cumulus MX is a cross platform version of Cumulus software that runs on Microsof
 
 ## First Run
 1. On the first run of CumulusMX the Installation wizard will need to be run. This can be started by navigating to the following `http://{serveraddress}:8998/wizard.html`
-2. Once the wizard is completed, you will be prompted to restart CumulusNX. Restart the container using the command `docker restart MXWeather`
+2. Once the wizard is completed, you will be prompted to restart Cumulus MX. Restart the container using the command `docker restart cumulusmx`
 3. The restart will prompt the `Cumulus.ini` file to be written. At shutdown of the service, the Cumulus.ini file will be copied to the `./config` folder. When the container is restarted, the Cumulus.ini file will be copied back to the `/opt/CumulusMX` directory from the `/opt/CumulusMX/config` folder.
 
 Note: config changes won't be committed to the INI file outside the container unless the container receives a SIGTERM. The config file is persistent inside the container until the container is rebuilt or updated.
 
 ## Known Issues:
-* If using the USB build and `/dev/hidraw0` device is not present the container will fail to start.
+* If using the docker compose file and `/dev/hidraw0` device is not present the container will fail to start.
 
 # Container builds
 The upstream repo for Cumulus MX is checked daily for new releases. When a new release is identified the build process should automatically trigger and commit a new build to https://hub.docker.com/r/hucknz/cumulusmx
