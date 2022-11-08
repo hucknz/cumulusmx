@@ -24,9 +24,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get latest version number
-          run: |
-            VER=$(cat upstream-releases/*)
-            echo "VERSION=$VER" >> $GITHUB_ENV
+        run: |
+          VER=$(cat upstream-releases/*)
+          echo "VERSION=$VER" >> $GITHUB_ENV
         
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
