@@ -1,7 +1,7 @@
+name: Check for new release
+
 # This script runs on a schedule to check for new releases from the upstream repo. If it finds a new release writes the latest release number to a file. 
 # Credit to peterevans on stackoverflow for the script: https://stackoverflow.com/a/58468828
-
-name: Check for new release
 
 on:
   schedule:
