@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Get latest version number
         run: |
-          VER=$(cat https://raw.githubusercontent.com/hucknz/cumulusmx/master/upstream-releases/cumulusmx-latest.txt)
+          VER=$(cat '/upstream-releases/cumulusmx-latest.txt')
           echo "VERSION=$VER" >> $GITHUB_ENV
         
       - name: Set up QEMU
