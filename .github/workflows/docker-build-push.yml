@@ -44,7 +44,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: hucknz/cumulusmx:latest, hucknz/cumulusmx:${{ env.VERSION }}
+          tags: hucknz/cumulusmx:${{ env.VERSION }}, hucknz/cumulusmx:latest
 
       - name: Send workflow result to Slack
         id: slack
