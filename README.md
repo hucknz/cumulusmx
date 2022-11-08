@@ -4,7 +4,7 @@
 Cumulus MX is a cross platform version of Cumulus software that runs on Microsoft Windows, all varieties of UNIX and Linux (including the Raspberry Pi Operating System), and Mac OS X. Learn more here: https://www.cumuluswiki.org/a/Main_Page
 
 ## Usage
-1. Ensure Docker is installed and configured on the host machine (I recommend using DockSTARTer if you want an easy way to learn Docker)
+1. Ensure Docker is installed and configured on the host machine (I recommend using DockSTARTer if you want an easy way to get started with Docker)
 2. Clone the docker-compose.yml and .env files to your local machine
 3. Modify the .env file to suit your environment
 4. Important: If you're not using USB passthrough make sure to remove the "devices" section from the docker-compose.yml file (see Known Issues)
