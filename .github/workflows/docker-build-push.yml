@@ -1,6 +1,7 @@
 name: Build and Push to Docker Hub
 
-# This workflow is triggered by an update to the upstream-releases file (which is triggered by the check-releases workflow) and proceeds to build the latest version and push to docker hub
+# This workflow is triggered by an update to the upstream-releases file (which is triggered by the check-releases workflow).
+# When triggered the latest version of the container is built and pushed to docker hub
 
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
