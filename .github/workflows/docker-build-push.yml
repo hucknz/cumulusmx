@@ -9,9 +9,9 @@ name: Build and Push to Docker Hub
 # documentation.
 
 on:
-  push:
-    paths:
-      - 'upstream-releases/*'
+#  push:
+#    paths:
+#      - 'upstream-releases/*'
   push:
     branches: [ "master" ]
     # Publish semver tags as releases.
