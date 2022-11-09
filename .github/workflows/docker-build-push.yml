@@ -47,22 +47,10 @@ jobs:
           tags: hucknz/cumulusmx:${{ env.VERSION }}, hucknz/cumulusmx:latest
 
       - name: Send workflow result to Slack
-        id: slack
-        uses: slackapi/slack-github-action@v1.23.0
-        with:
-          payload: |
-            {
-              "text": "${{ github.repository }} build ${{ job.status }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "Build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
-                  }
-                }
-              ]
-            }
+        uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_MESSAGE: 'Build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}'
+          SLACK_TITLE: ${{ github.repository }} build ${{ job.status }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          MSG_MINIMAL: true
