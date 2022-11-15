@@ -12,6 +12,8 @@ on:
   push:
     paths:
       - 'upstream-releases/*'
+  workflow_dispatch:
+    
 #  push:
 #    branches: [ "master" ]
 #    # Publish semver tags as releases.
