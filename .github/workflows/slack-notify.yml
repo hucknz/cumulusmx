@@ -1,0 +1,25 @@
+name: Build and Push to Docker Hub
+
+# This workflow is triggered by an update to the upstream-releases file (which is triggered by the check-releases workflow).
+# When triggered the latest version of the container is built and pushed to docker hub
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify slack success
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_WEBHOOK_URL }}
+        uses: voxmedia/github-action-slack-notify-build@v1
+        with:
+          channel: bingbong
+          status: SUCCESS
+          color: good
