@@ -16,10 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Notify slack success
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_WEBHOOK_URL }}
         uses: voxmedia/github-action-slack-notify-build@v1
         with:
           channel: bingbong
           status: SUCCESS
           color: good
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
