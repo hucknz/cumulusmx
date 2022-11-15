@@ -1,4 +1,4 @@
-name: Build and Push to Docker Hub
+name: Slack notification
 
 # This workflow is triggered by an update to the upstream-releases file (which is triggered by the check-releases workflow).
 # When triggered the latest version of the container is built and pushed to docker hub
