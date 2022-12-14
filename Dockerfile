@@ -1,9 +1,9 @@
 #
-# MXWeather Dockerfile
+# Cumulus MX Dockerfile
 #
 # Thanks to https://github.com/Optoisolated/MXWeather
 #
-# Notes: 
+# Notes:
 #
 # In order to prevent docker from turning Cumulus.ini into a folder, you need to touch it first
 # eg. touch ${DOCKERCONFDIR}/cumulusmx/Cumulus.ini
@@ -53,10 +53,10 @@ RUN echo "deb https://download.mono-project.com/repo/ubuntu stable-focal main" >
 # Configure TZData
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Ensure CumulusMX Updates are acutally downloaded, and not cached
+# Ensure Cumulus MX Updates are acutally downloaded, and not cached
 ARG CACHEBUST=1
 
-# Download Latest CumulusMX
+# Download Latest Cumulus MX
 RUN \
   curl -L $(curl -s https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest | grep browser_ | cut -d\" -f4) --output /tmp/CumulusMX.zip && \
   mkdir /opt/CumulusMX && \
