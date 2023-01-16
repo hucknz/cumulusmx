@@ -7,6 +7,9 @@ on:
   schedule:
     - cron:  '41 19 * * *'
 
+  # Enable manual trigger
+  workflow_dispatch:
+
 jobs:
   get-version:
     runs-on: ubuntu-latest
