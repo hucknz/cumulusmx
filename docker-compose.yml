@@ -1,5 +1,5 @@
   cumulusmx:
-    container_image: cumulusmx
+    container_name: cumulusmx
     image: hucknz/cumulusmx
     restart: unless-stopped
     environment:
