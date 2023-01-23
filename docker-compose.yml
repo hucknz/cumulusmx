@@ -1,4 +1,4 @@
-  MXWeather:
+  cumulusmx:
     container_image: cumulusmx
     image: hucknz/cumulusmx
     restart: unless-stopped
