@@ -16,8 +16,6 @@
       - ${DOCKERCONFDIR}/cumulusmx/publicweb:/opt/CumulusMX/publicweb
       - ${DOCKERCONFDIR}/cumulusmx/templates:/opt/CumulusMX/web
       - ${DOCKERCONFDIR}/cumulusmx/reports:/opt/CumulusMX/Reports
-    devices:
-      - /dev/hidraw0:/dev/hidraw0
     ports:
       - 8998:8998
       - 8009:80
