@@ -20,7 +20,7 @@ jobs:
       - name: Fetch release version
         run: |
           curl -sL https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest | \
-          jq 'if .tag_name != null then "-r .tag_name > upstream-releases/cumulusmx-latest.txt" else empty end'
+          jq -r ".tag_name" > upstream-releases/cumulusmx-latest.txt
       - name: Check for modified files
         id: git-check
         run: echo "modified=$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")" >> $GITHUB_OUTPUT
