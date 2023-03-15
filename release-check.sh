@@ -6,5 +6,5 @@ release_version=$(echo $release | jq .tag_name -r)
 
 if [ -z "$release_version" ] || [ "$release_version" != "" ]
   then
-    echo "$release_version" > upstream-releases/cumulusmx-latest-test.txt
+    echo "$release_version" > upstream-releases/cumulusmx-latest.txt
 fi
