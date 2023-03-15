@@ -12,7 +12,7 @@ on:
   # Automatically trigger when upstram release file is changed
   push:
     paths:
-      - 'upstream-releases/*'
+      - 'upstream-releases/cumulusmx-latest.txt'
 
   # Enable manual trigger
   workflow_dispatch:
