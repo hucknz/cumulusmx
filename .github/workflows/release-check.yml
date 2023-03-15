@@ -18,7 +18,7 @@ jobs:
         with:
           token: ${{ secrets.PAT }}
       - name: Fetch release version
-        run: .github/release-check.sh
+        run: bash release-check.sh
       - name: Check for modified files
         id: git-check
         run: echo "modified=$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")" >> $GITHUB_OUTPUT
