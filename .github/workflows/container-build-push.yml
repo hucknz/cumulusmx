@@ -20,7 +20,7 @@ on:
 
 jobs:
   push_to_registries:
-    name: Build and Push to Docker Hub and ghcr.io
+    name: Push Docker image to Docker Hub and ghcr.io
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -30,7 +30,7 @@ jobs:
         run: |
           VER=$(curl -s https://raw.githubusercontent.com/hucknz/cumulusmx/master/upstream-releases/cumulusmx-latest.txt)
           echo "VERSION=$VER" >> $GITHUB_ENV
-
+          
       - name: Check out the repo
         uses: actions/checkout@v3
 
@@ -40,7 +40,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Log in to ghcr.io
+      - name: Log in to the ghcr.io
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
           registry: ghcr.io
@@ -55,9 +55,9 @@ jobs:
             hucknz/cumulusmx
             ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=${{env.VERSION}}
+            type=raw,value=${{ env.VERSION }}
             type=raw,value=latest
-
+            
       - name: Build and push Docker images
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
