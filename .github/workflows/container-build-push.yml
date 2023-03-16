@@ -45,7 +45,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.PAT }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -60,5 +60,24 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: hucknz/cumulusmx:${{ env.VERSION }}, hucknz/cumulusmx:latest
+
+      - name: Notify slack success
+        if: success()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: voxmedia/github-action-slack-notify-build@v1
+        with:
+          channel: bingbong
+          status: SUCCESS
+          color: good
+
+      - name: Notify slack fail
+        if: failure()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: voxmedia/github-action-slack-notify-build@v1
+        with:
+          channel: bingbong
+          status: FAILED
+          color: danger
