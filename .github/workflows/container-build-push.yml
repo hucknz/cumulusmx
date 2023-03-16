@@ -1,4 +1,4 @@
-name: Build and Push to Docker Hub and Github Container Registry
+name: Build and Push to Docker Hub and ghcr.io
 
 # This workflow is triggered by an update to the upstream-releases file (which is triggered by the check-releases workflow).
 # When triggered the latest version of the container is built and pushed to docker hub
@@ -20,7 +20,7 @@ on:
 
 jobs:
   push_to_registries:
-    name: Push Docker image to multiple registries
+    name: Build and Push to Docker Hub and ghcr.io
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -40,7 +40,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Log in to the Container registry
+      - name: Log in to ghcr.io
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
           registry: ghcr.io
@@ -55,7 +55,7 @@ jobs:
             hucknz/cumulusmx
             ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=${{ env.VERSION }}
+            type=raw,value={{env.VERSION}}
             type=raw,value=latest
 
       - name: Build and push Docker images
