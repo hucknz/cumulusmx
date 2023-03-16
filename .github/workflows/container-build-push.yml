@@ -55,7 +55,7 @@ jobs:
             hucknz/cumulusmx
             ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value={{env.VERSION}}
+            type=raw,value=${{env.VERSION}}
             type=raw,value=latest
 
       - name: Build and push Docker images
