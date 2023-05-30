@@ -19,7 +19,7 @@ on:
   
   # Trigger monthly to ensure images aren't too stale
   schedule:
-    - cron:  '41 29 1 * *'
+    - cron:  '51 19 1 * *'
 
 
 jobs:
