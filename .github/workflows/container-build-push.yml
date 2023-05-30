@@ -18,7 +18,6 @@ on:
   workflow_dispatch:
   
   # Trigger monthly to ensure images aren't too stale
-  on:
   schedule:
     - cron:  '41 19 1 * *'
 
