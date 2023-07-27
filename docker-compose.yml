@@ -22,3 +22,6 @@ services:
     ports:
       - 8998:8998
       - 8009:80
+# Remove this comment if using a USB weather station, remove this comment and the lines below if not using a USB weatherstation
+    devices:
+      - /dev/hidraw0:/dev/hidraw0
