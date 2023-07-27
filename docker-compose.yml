@@ -1,3 +1,6 @@
+version: "3.4"
+
+services:
   cumulusmx:
     container_name: cumulusmx
     image: hucknz/cumulusmx
