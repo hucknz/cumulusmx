@@ -97,18 +97,14 @@ jobs:
           status: FAILED
           color: danger
 
-      - name: Notify Discord of failure
+      - name: Notify Discord of success
         if: success()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
-        with:
-          args: 'CumulusMX build succeeded.'
 
       - name: Notify Discord of failure
         if: failure()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
-        with:
-          args: 'CumulusMX build failed.'
