@@ -1,4 +1,4 @@
-name: Build and Push to Docker Hub and ghcr.io
+name: Build and push to Docker Hub and ghcr.io
 
 # This workflow is triggered by an update to the upstream-releases file (which is triggered by the check-releases workflow).
 # When triggered the latest version of the container is built and pushed to docker hub
@@ -9,7 +9,7 @@ name: Build and Push to Docker Hub and ghcr.io
 # documentation.
 
 on:
-  # Automatically trigger when upstram release file is changed
+  # Automatically trigger when upstream release file is changed
   push:
     paths:
       - 'upstream-releases/*'
@@ -23,7 +23,7 @@ on:
 
 
 jobs:
-  push_to_registries:
+  build_and_push:
     name: Push Docker image to Docker Hub and ghcr.io
     runs-on: ubuntu-latest
     permissions:
@@ -86,8 +86,8 @@ jobs:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           
       - name: Notify outcome to Slack
-        uses: act10ns/slack@v2
+        uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          steps: ${{ toJson(steps) }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest
         if: always()
