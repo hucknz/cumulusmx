@@ -24,7 +24,7 @@ on:
 
 jobs:
   build_and_push:
-    name: Push Docker image to Docker Hub and ghcr.io
+    name: Build and push CumulusMX Docker image to Docker Hub and ghcr.io
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -89,5 +89,5 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest
+          fields: repo,workflow,eventName,took,message,commit,job,took
         if: always()
