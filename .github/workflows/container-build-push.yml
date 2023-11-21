@@ -1,4 +1,4 @@
-name: Build and push to Docker Hub and ghcr.io
+name: Build and push CumulusMX to Docker Hub and ghcr.io
 
 # This workflow is triggered by an update to the upstream-releases file (which is triggered by the check-releases workflow).
 # When triggered the latest version of the container is built and pushed to docker hub
