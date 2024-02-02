@@ -38,6 +38,7 @@ jobs:
         
       - name: Get latest version number
         id: get_version
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         run: |
           VER=$(curl -s https://raw.githubusercontent.com/hucknz/cumulusmx/master/upstream-releases/cumulusmx-latest.txt)
           echo "VERSION=$VER" >> $GITHUB_ENV
