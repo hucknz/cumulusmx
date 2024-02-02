@@ -48,7 +48,7 @@ jobs:
         run: echo "MODIFIED=$([ -z "`git status --porcelain`" ] && echo "0" || echo "1")" >> $GITHUB_ENV
         
       - name: Set up QEMU
-        if: ${{ env.GIT_MODIFIED = 0 }}
+        if: ${{ env.MODIFIED > 0 }}
         id: setup_qemu
         uses: docker/setup-qemu-action@v2
 
