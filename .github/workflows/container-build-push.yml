@@ -98,7 +98,6 @@ jobs:
           labels: ${{ steps.extract_metadata.outputs.labels }}
 
       - name: Notify outcome to Slack
-        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         id: notify_result
         uses: act10ns/slack@v2
         with:
