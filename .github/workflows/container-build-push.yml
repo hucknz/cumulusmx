@@ -32,6 +32,10 @@ jobs:
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
+      - name: Get date of most recent commit
+        id: get_date
+        run: echo "NEW_COMMIT_COUNT=$(git log --oneline --since '12 hours ago' | wc -l)" >> $GITHUB_ENV
+        
       - name: Get latest version number
         id: get_version
         run: |
