@@ -53,10 +53,12 @@ jobs:
         uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         id: setup_buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Log in to Docker Hub
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         id: authenticate_dockerhub
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
@@ -64,6 +66,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Log in to the ghcr.io
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         id: authenticate_ghcr
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
@@ -72,6 +75,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         id: extract_metadata
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
@@ -83,6 +87,7 @@ jobs:
             type=raw,value=latest
 
       - name: Build and push Docker images
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         id: build_images
         uses: docker/build-push-action@v3
         with:
@@ -93,6 +98,7 @@ jobs:
           labels: ${{ steps.extract_metadata.outputs.labels }}
 
       - name: Notify outcome to Slack
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         id: notify_result
         uses: act10ns/slack@v2
         with:
