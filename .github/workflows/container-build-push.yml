@@ -42,6 +42,8 @@ jobs:
       - name: Check out the repo
         id: checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Required to count the commits
         
       - name: Get date of most recent commit
         id: get_date
