@@ -45,7 +45,7 @@ jobs:
         
       - name: Get date of most recent commit
         id: get_date
-        run: echo "MODIFIED=$(git log --oneline --since '24 hours ago' | wc -l)" >> $GITHUB_ENV
+        run: echo "MODIFIED=$(git log --oneline --since '24 hours ago' ./upstream-releases/cumulusmx-latest.txt | wc -l)" >> $GITHUB_ENV
         
       - name: Set up QEMU
         if: ${{ env.MODIFIED > 0 }}
