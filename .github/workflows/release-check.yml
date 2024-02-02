@@ -5,7 +5,7 @@ name: Check for new release
 
 on:
   schedule:
-    - cron:  '41 19 * * *'
+    - cron:  '21 19 * * *'
 
   # Enable manual trigger
   workflow_dispatch:
