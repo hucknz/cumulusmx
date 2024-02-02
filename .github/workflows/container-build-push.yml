@@ -32,13 +32,9 @@ jobs:
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
-      - name: Get date of most recent commit
-        id: get_date
-        run: echo "NEW_COMMIT_COUNT=$(git log --oneline --since '12 hours ago' | wc -l)" >> $GITHUB_ENV
         
       - name: Get latest version number
         id: get_version
-        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         run: |
           VER=$(curl -s https://raw.githubusercontent.com/hucknz/cumulusmx/master/upstream-releases/cumulusmx-latest.txt)
           echo "VERSION=$VER" >> $GITHUB_ENV
@@ -46,8 +42,13 @@ jobs:
       - name: Check out the repo
         id: checkout
         uses: actions/checkout@v3
-
+        
+      - name: Get date of most recent commit
+        id: get_date
+        run: echo "NEW_COMMIT_COUNT=$(git log --oneline --since '12 hours ago' | wc -l)" >> $GITHUB_ENV
+        
       - name: Set up QEMU
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         id: setup_qemu
         uses: docker/setup-qemu-action@v2
 
