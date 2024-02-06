@@ -42,25 +42,16 @@ jobs:
       - name: Check out the repo
         id: checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # Required to count the commits
-        
-      - name: Get date of most recent commit
-        id: get_date
-        run: echo "MODIFIED=$(git log --oneline --since '24 hours ago' ./upstream-releases/cumulusmx-latest.txt | wc -l)" >> $GITHUB_ENV
         
       - name: Set up QEMU
-        if: ${{ env.MODIFIED > 0 }}
         id: setup_qemu
         uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
-        if: ${{ env.MODIFIED > 0 }}
         id: setup_buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Log in to Docker Hub
-        if: ${{ env.MODIFIED > 0 }}
         id: authenticate_dockerhub
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
@@ -68,7 +59,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Log in to the ghcr.io
-        if: ${{ env.MODIFIED > 0 }}
         id: authenticate_ghcr
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
@@ -77,7 +67,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
-        if: ${{ env.MODIFIED > 0 }}
         id: extract_metadata
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
@@ -89,7 +78,6 @@ jobs:
             type=raw,value=latest
 
       - name: Build and push Docker images
-        if: ${{ env.MODIFIED > 0 }}
         id: build_images
         uses: docker/build-push-action@v3
         with:
