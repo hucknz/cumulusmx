@@ -18,8 +18,8 @@ on:
   workflow_dispatch:
 
   # Trigger monthly to ensure images aren't too stale
-  schedule:
-    - cron:  '51 19 1 * *'
+  #schedule:
+  #  - cron:  '51 19 1 * *'
 
 
 jobs:
