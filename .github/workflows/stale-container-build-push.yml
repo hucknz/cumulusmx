@@ -10,6 +10,9 @@ name: Monthly build and push CumulusMX to Docker Hub and ghcr.io
 
 on:
 
+  # Allow manual trigger
+  workflow_dispatch:
+
   # Trigger monthly to ensure images aren't too stale
   schedule:
     - cron:  '51 19 1 * *'
