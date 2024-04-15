@@ -43,7 +43,7 @@ ARG CACHEBUST=1
 # Download Latest Cumulus MX
 RUN curl -L $(curl -s https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest | grep browser_ | cut -d\" -f4) --output /tmp/CumulusMX.zip && \
     mkdir -p /opt/CumulusMX/publicweb /tmp/web && \
-    unzip /tmp/CumulusMX.zip -d /opt/CumulusMX && \
+    unzip /tmp/CumulusMX.zip -d /opt/ && \
     chmod +x /opt/CumulusMX/CumulusMX.exe && \
     cp -R /opt/CumulusMX/web/* /tmp/web/ && \
     cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
