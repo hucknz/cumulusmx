@@ -17,7 +17,7 @@
 # Weather data, logs, templates, and settings are persistent outside of the container
 
 # Pull base image.
-FROM ubuntu:22.04
+FROM ubuntu:20.04
 LABEL Maintainer="hucknz"
 
 # Config Info
