@@ -16,7 +16,7 @@
 
 # Weather data, logs, templates, and settings are persistent outside of the container
 
-# Pull base image.
+# Pull base image
 FROM ubuntu:22.04
 LABEL Maintainer="hucknz"
 
@@ -25,30 +25,14 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=ETC/UTC
 SHELL ["/bin/bash", "-c"]
 
-# Install Nginx.
-RUN \
-  apt-get update && \
-  apt-get install -y software-properties-common && \
-  add-apt-repository -y ppa:nginx/stable && \
-  apt-get update && \
-  apt-get install -y nginx && \
-  rm -rf /var/lib/apt/lists/* && \
-  echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
-  chown -R www-data:www-data /var/lib/nginx
-
-# Install Packages
+# Install required packages
 RUN apt-get update && \
-    apt-get install -y curl tzdata unzip libudev-dev git python3-virtualenv
+    apt-get install -y nginx mono-complete curl tzdata unzip libudev-dev git python3-virtualenv && \
+    apt-get clean
 
-# Install Mono
-RUN apt-get update && \
-    apt-get install -y curl && \
-    rm -rf /var/lib/apt/lists/*
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-RUN echo "deb https://download.mono-project.com/repo/ubuntu stable-jammy main" > /etc/apt/sources.list.d/mono-xamarin.list && \
-    apt-get update && \
-    apt-get install -y mono-devel ca-certificates-mono fsharp mono-vbnc nuget && \
-    rm -rf /var/lib/apt/lists/*
+# Configure NGINX
+RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
+    chown -R www-data:www-data /var/lib/nginx
 
 # Configure TZData
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
