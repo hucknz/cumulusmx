@@ -8,7 +8,9 @@ Cumulus MX is a cross platform version of the Cumulus weather station software. 
 With the release of CumulusMX v4 there are breaking changes for the Docker containers. **Please read the warning below before moving to v4.**
 
 ### Latest releases ###
-"cumulusmx:v4" will be available for all new releases going forward. These will automatically be updated as new versions are released. The "cumulusmx:latest" tag will no longer be used. A v4 build will be available shortly. 
+"cumulusmx:v4" will be available for all new releases going forward. This will automatically be updated as new versions are released. A v4 build will be available shortly. 
+
+The "cumulusmx:latest" tag will no longer be used. 
 
 #### Warning ####
 The v4 release includes an automatic migration from v3 to v4 data structure. **Please ensure you back up your data files before updating to v4. I can not guarantee the migration will work correctly for you.**
