@@ -7,9 +7,9 @@ if [ "$(ls -A /opt/CumulusMX/data/ | wc -l)" -gt 1 ]; then
 # Checks for datav3 folder. If it doesn't exist then creates it and copies v3 files to it and makes a backup. 
     if [ ! -f "/opt/CumulusMX/config/.migrated" ]; then 
       # Backup v3 Cumulus.ini
-      cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/config/Cumulus.ini.v3.bak
+      #cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/config/Cumulus.ini.v3.bak
       # Copy Cumulus.ini to root
-      cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/
+      #cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/
       # Backup data files
       mkdir -p /opt/CumulusMX/backup/datav3
       cp -R /opt/CumulusMX/data/* /opt/CumulusMX/backup/datav3
