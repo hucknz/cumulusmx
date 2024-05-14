@@ -1,7 +1,7 @@
 # Cumulus MX Weather Station app
 
 ## Overview
-Cumulus MX is a cross platform version of the Cumulus weather station software. [Learn more] (https://www.cumuluswiki.org/a/Main_Page) at the Cumulus wiki.
+Cumulus MX is a cross platform version of the Cumulus weather station software. [Learn more](https://www.cumuluswiki.org/a/Main_Page) at the Cumulus wiki.
 
 ## Important changes for v4 ##
 
