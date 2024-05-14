@@ -20,7 +20,7 @@ on:
 
 jobs:
   build_and_push:
-    name: Build and push CumulusMX v4 Docker image to Docker Hub and ghcr.io
+    name: v4 monthly build and push
     runs-on: ubuntu-latest
     permissions:
       packages: write

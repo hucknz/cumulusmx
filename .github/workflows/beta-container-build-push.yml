@@ -15,7 +15,7 @@ on:
 
 jobs:
   build_and_push:
-    name: Build and push CumulusMX v4-beta Docker image to Docker Hub and ghcr.io
+    name: Beta build and push
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -65,8 +65,7 @@ jobs:
             hucknz/cumulusmx
             ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=${{ env.VERSION }}
-            type=raw,value=v4
+            type=raw,value=v4-beta
 
       - name: Build and push Docker images
         id: build_images
