@@ -1,14 +1,14 @@
 # Cumulus MX Weather Station app
 
 ## Overview
-Cumulus MX is a cross platform version of Cumulus software that runs on Microsoft Windows, all varieties of UNIX and Linux (including the Raspberry Pi Operating System), and Mac OS X. Learn more here: https://www.cumuluswiki.org/a/Main_Page
+Cumulus MX is a cross platform version of the Cumulus weather station software. Learn more here: https://www.cumuluswiki.org/a/Main_Page
 
 ## Important changes for v4 ##
 
 With the release of CumulusMX v4 there are breaking changes for the Docker containers. **Please read the warning below before moving to v4.**
 
 ### Latest releases ###
-"cumulusmx:v4" will be available for new releases going forward. These will automatically be updated as new versions are released. The "cumulusmx:latest" tag will no longer be used. A v4 build will be available shortly. 
+"cumulusmx:v4" will be available for all new releases going forward. These will automatically be updated as new versions are released. The "cumulusmx:latest" tag will no longer be used. A v4 build will be available shortly. 
 
 #### Warning ####
 The v4 release includes an automatic migration from v3 to v4 data structure. **Please ensure you back up your data files before updating to v4. I can not guarantee the migration will work correctly for you.**
@@ -38,4 +38,4 @@ The upstream repo for Cumulus MX is checked daily for new releases. When a new r
 
 # Thanks
 
-All credit goes to [@optoisolated](https://github.com/optoisolated/MXWeather) for their work in containerising Cumulus MX and providing helpful documentation. 
+Credit to [@optoisolated](https://github.com/optoisolated/MXWeather) for their initial work in containerising Cumulus MX. 
