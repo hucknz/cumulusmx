@@ -52,7 +52,7 @@ RUN curl -L https://github.com/cumulusmx/CumulusMX/releases/download/b3283/Cumul
 VOLUME ["/opt/CumulusMX/data","/opt/CumulusMX/backup","/opt/CumulusMX/Reports","/var/log/nginx","/opt/CumulusMX/MXdiags","/opt/CumulusMX/publicweb","/opt/CumulusMX/web"]
 
 # Add Start Script# Test File
-COPY ./MXWeather_v3.sh /opt/CumulusMX/
+COPY ./MXWeather.sh /opt/CumulusMX/
 
 # Add Nginx Config
 COPY ./nginx.conf /etc/nginx/
@@ -61,7 +61,7 @@ RUN ln -s /etc/nginx/sites-available/MXWeather.conf /etc/nginx/sites-enabled/MXW
     rm /etc/nginx/sites-enabled/default
 
 WORKDIR /opt/CumulusMX/
-RUN chmod +x MXWeather_v3.sh
+RUN chmod +x MXWeather.sh
 
 # Expose ports
 EXPOSE 80
