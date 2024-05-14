@@ -36,7 +36,7 @@ Note: config changes won't be committed to the INI file outside the container un
 * If using the docker compose file and `/dev/hidraw0` device is not present the container will fail to start.
 
 # Container builds
-The upstream repo for Cumulus MX is checked daily for new releases. When a new release is identified the build process should automatically trigger and commit a new build to https://hub.docker.com/r/hucknz/cumulusmx:latest and https://ghcr.io/hucknz/cumulusmx
+The upstream repo for Cumulus MX is checked daily for new releases. When a new release is identified the build process should automatically trigger and commit a new build to https://hub.docker.com/r/hucknz/cumulusmx and https://ghcr.io/hucknz/cumulusmx. You can use the v3 or v4 tags to get the latest build of each version. 
 
 # Thanks
 
