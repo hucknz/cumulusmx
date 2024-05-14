@@ -81,6 +81,7 @@ jobs:
             hucknz/cumulusmx
             ghcr.io/${{ github.repository }}
           tags: |
+            type=raw,value=b3283
             type=raw,value=v3
 
       - name: Build and push Docker images
@@ -88,7 +89,7 @@ jobs:
         id: build_images
         uses: docker/build-push-action@v5
         with:
-          context: ./v3
+          context: v3
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.extract_metadata.outputs.tags }}
