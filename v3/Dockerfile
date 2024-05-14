@@ -17,7 +17,7 @@
 # Weather data, logs, templates, and settings are persistent outside of the container
 
 # Pull base image
-FROM mono:slim
+FROM ubuntu:24.04
 LABEL Maintainer="hucknz"
 
 # Config Info
@@ -27,7 +27,7 @@ SHELL ["/bin/bash", "-c"]
 
 # Install required packages
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends nginx curl tzdata unzip libudev-dev git python3-virtualenv && \
+    apt-get install -y --no-install-recommends nginx mono-complete curl tzdata unzip libudev-dev git python3-virtualenv && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
