@@ -1,4 +1,4 @@
-name: v3 Monthly build and push CumulusMX to Docker Hub and ghcr.io
+name: v3 monthly build and push
 
 # This workflow is triggered by an update to the upstream-releases file (which is triggered by the check-releases workflow).
 # When triggered the latest version of the container is built and pushed to docker hub
