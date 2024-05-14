@@ -8,10 +8,10 @@ Cumulus MX is a cross platform version of Cumulus software that runs on Microsof
 With the release of CumulusMX v4 there are breaking changes for the Docker containers. 
 
 ### Latest releases ###
-"cumulusmx:v4" will be available for new releases going forward. These will automatically be update as new versions are released. The "cumulusmx:latest" tag will no longer be used. A v4 build will be available shortly. 
+"cumulusmx:v4" will be available for new releases going forward. These will automatically be updated as new versions are released. The "cumulusmx:latest" tag will no longer be used. A v4 build will be available shortly. 
 
 #### Warning ####
-The v4 release includes an automatic migration step. Please ensure you back up your data files before updating the container. 
+The v4 release includes an automatic migration from v3 to v4 data structure. *Please ensure you back up your data files before updating the container. I can not guarantee the migration will work for you.*
 
 ### Version 3 ###
 "cumulusmx:v3" will be available for version 3 builds. These will be updated monthly to avoid the containers going stale or security flaws being left open. 
