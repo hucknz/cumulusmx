@@ -14,7 +14,7 @@
 #      mkdir -p /opt/CumulusMX/backup/datav3
 #      cp -R /opt/CumulusMX/data/* /opt/CumulusMX/backup/datav3
       # Copy data files to datav3 for migration
-      mkdir /opt/CumulusMX/datav3
+#      mkdir /opt/CumulusMX/datav3
 #      cp -R /opt/CumulusMX/data/* /opt/CumulusMX/datav3
       # Run migration script
 #      expect <<EOF
