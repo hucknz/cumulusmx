@@ -67,7 +67,7 @@ trap 'kill ${!}; term_handler' SIGTERM
 
 # run application
 cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/
-dotnet /opt/CumulusMX/CumulusMX.exe >> /var/log/nginx/CumulusMX.log &
+dotnet /opt/CumulusMX/CumulusMX.dll >> /var/log/nginx/CumulusMX.log &
 pid="$!"
 
 # wait forever
