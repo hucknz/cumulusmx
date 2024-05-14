@@ -13,7 +13,7 @@ With the release of CumulusMX v4 there are breaking changes for the Docker conta
 The "cumulusmx:latest" tag will no longer be used. 
 
 #### Warning ####
-The v4 release includes an automatic migration from v3 to v4 data structure. **Please ensure you back up your data files before updating to v4. I can not guarantee the migration will work correctly for you.**
+The v4 release includes an automatic migration from v3 to v4 data structure. **Please ensure you back up your data files before updating to v4. I can not guarantee the migration will work correctly for you and no support will be provided.**
 
 ### Version 3 ###
 "cumulusmx:v3" will be available for version 3 builds. These will be updated monthly to avoid the containers going stale or security flaws being left open. 
