@@ -3,6 +3,19 @@
 ## Overview
 Cumulus MX is a cross platform version of Cumulus software that runs on Microsoft Windows, all varieties of UNIX and Linux (including the Raspberry Pi Operating System), and Mac OS X. Learn more here: https://www.cumuluswiki.org/a/Main_Page
 
+## Important changes for v4 ##
+
+With the release of CumulusMX v4 there are breaking changes for the Docker containers. 
+
+### Latest releases ###
+"cumulusmx:v4" will be available for new releases going forward. These will automatically be update as new versions are released. The "cumulusmx:latest" tag will no longer be used. A v4 build will be available shortly. 
+
+#### Warning ####
+The v4 release includes an automatic migration step. Please ensure you back up your data files before updating the container. 
+
+### Version 3 ###
+"cumulusmx:v3" will be available for version 3 builds. These will be updated monthly to avoid the containers going stale or security flaws being left open. 
+
 ## Usage
 1. Ensure Docker is installed and configured on the host machine (I recommend using DockSTARTer if you want an easy way to get started with Docker)
 2. Clone the docker-compose.yml and .env files to your local machine
