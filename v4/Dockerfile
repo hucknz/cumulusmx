@@ -17,7 +17,7 @@
 # Weather data, logs, templates, and settings are persistent outside of the container
 
 # Pull base image
-FROM mcr.microsoft.com/dotnet/sdk:8.0-jammy
+FROM mcr.microsoft.com/dotnet/sdk:8.0
 LABEL Maintainer="hucknz"
 
 # Config Info
