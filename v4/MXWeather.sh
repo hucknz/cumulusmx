@@ -25,8 +25,6 @@ expect "Press Enter to exit"
 send "\r"
 expect eof
 EOF
-      # Copy migrated Cumulus.ini file back to config folder
-      cp /opt/CumulusMX/Cumulus.ini /opt/CumulusMX/config/Cumulus.ini
       # Create a backup of the migrated Cumulus.ini file
       cp /opt/CumulusMX/Cumulus.ini /opt/CumulusMX/config/Cumulus.ini.v4.bak
       # Leave a file to indicate the migration has been completed
