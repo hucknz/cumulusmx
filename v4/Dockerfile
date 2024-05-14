@@ -17,7 +17,7 @@
 # Weather data, logs, templates, and settings are persistent outside of the container
 
 # Pull base image
-FROM ubuntu:24.04
+FROM mcr.microsoft.com/dotnet/sdk:8.0
 LABEL Maintainer="hucknz"
 
 # Config Info
@@ -27,7 +27,7 @@ SHELL ["/bin/bash", "-c"]
 
 # Install required packages
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends nginx mono-complete curl tzdata unzip libudev-dev git python3-virtualenv && \
+    apt-get install -y --no-install-recommends nginx curl tzdata unzip libudev-dev git python3-virtualenv && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -41,7 +41,7 @@ RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
 ARG CACHEBUST=1
 
 # Download Latest Cumulus MX
-RUN curl -L https://github.com/cumulusmx/CumulusMX/releases/download/b3283/CumulusMXDist3283a.zip --output /tmp/CumulusMX.zip && \
+RUN curl -L $(curl -s https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest | grep browser_ | cut -d\" -f4) --output /tmp/CumulusMX.zip && \
     mkdir -p /opt/CumulusMX/publicweb /tmp/web && \
     unzip /tmp/CumulusMX.zip -d /opt/ && \
     chmod +x /opt/CumulusMX/CumulusMX.exe && \
