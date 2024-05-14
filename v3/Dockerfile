@@ -67,4 +67,4 @@ RUN chmod +x MXWeather.sh
 EXPOSE 80
 EXPOSE 8998
 
-CMD ["./MXWeather_v3.sh"]
+CMD ["./MXWeather.sh"]
