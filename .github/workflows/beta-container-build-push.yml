@@ -83,5 +83,5 @@ jobs:
         with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
-          message: CumulusMX ${{job.name}} was a ${{ job.status }}
+          message: CumulusMX beta build and publish containers was a ${{ job.status }}
         if: always()
