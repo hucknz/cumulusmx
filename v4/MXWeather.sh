@@ -36,13 +36,13 @@ else
     echo "No data detected. Skipping migration."
 fi
 
-# Start nginx web server
+# Start NGINX web server
 service nginx start
 
-# Copy Web Support Files
+# Copy Web Support files
 cp -Rn /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
 
-# Copy Public Web Templates
+# Copy Public Web templates
 cp -Rn /tmp/web/* /opt/CumulusMX/web/
 
 set -x
@@ -55,19 +55,21 @@ term_handler() {
     wait "$pid"
     sleep 2
     cp -f /opt/CumulusMX/Cumulus.ini /opt/CumulusMX/config/
+    cp -f /opt/CumulusMX/UniqueId.txt /opt/CumulusMX/config/
   fi
   exit 143; # 128 + 15 -- SIGTERM
 }
 
-# setup handlers
+# Setup handlers
 trap 'kill ${!}; term_handler' SIGTERM
 
-# run application
+# Run application
+cp -f /opt/CumulusMX/config/UniqueId.txt /opt/CumulusMX/
 cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/
 dotnet /opt/CumulusMX/CumulusMX.dll >> /var/log/nginx/CumulusMX.log &
 pid="$!"
 
-# wait forever
+# Wait forever
 while true
 do
   tail -f /dev/null & wait ${!}
