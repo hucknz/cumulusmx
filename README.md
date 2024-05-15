@@ -12,7 +12,7 @@ With the release of CumulusMX v4 there are breaking changes for the Docker conta
 
 "cumulusmx:v4" will be available for all new releases going forward. This will automatically be updated as new versions are released.
 
-The "cumulusmx:latest" tag will no longer be used. 
+The "cumulusmx:latest" tag will be moved to v4 once it is more stable. 
 
 #### Warning ####
 The v4 release includes an automatic migration from v3 to v4 data structure. **Please ensure you back up your data files before updating to v4. I can not guarantee the migration will work correctly for you and no support will be provided.**
