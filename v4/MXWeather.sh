@@ -6,8 +6,6 @@
 if [ "$(ls -A /opt/CumulusMX/data/ | wc -l)" -gt 1 ]; then 
 # Checks for datav3 folder. If it doesn't exist then creates it and copies v3 files to it and makes a backup. 
     if [ ! -f "/opt/CumulusMX/config/.migrated" ]; then 
-      # Backup v3 Cumulus.ini
-      cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/config/Cumulus.ini.v3.bak
       # Copy Cumulus.ini to root
       cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/
       # Backup data files
@@ -27,6 +25,8 @@ expect eof
 EOF
       # Leave a file to indicate the migration has been completed
       touch /opt/CumulusMX/config/.migrated
+      # Copy UniqueID file to config folder
+      cp -f /opt/CumulusMX/UniqueId.txt /opt/CumulusMX/config/
     else 
       # If the .migrated file already exists it skips the migration. 
       echo "Migration already completed."
