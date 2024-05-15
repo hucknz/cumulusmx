@@ -65,7 +65,7 @@ jobs:
             hucknz/cumulusmx
             ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=v4-beta-nomigrate
+            type=raw,value=v4-beta-migrate
 
       - name: Build and push Docker images
         id: build_images
