@@ -7,11 +7,11 @@ if [ "$MIGRATE" != "false" ]; then
 echo "Migration enabled. Checking if migration has already been completed..."
 
   # Checks if there is more than 1 file in the data folder (indicates new install or existing)
-
   if [ "$(ls -A /opt/CumulusMX/data/ | wc -l)" -gt 1 ]; then 
-    # Checks to see if data has already been migrated and skips if it has. 
+  echo "Multiple files detected. Proceeding with migration..."
 
-    if [ ! -f "/opt/CumulusMX/config/.migrated" ] || [ ! -f "/opt/CumulusMX/config/.nodata" ] || [ "$MIGRATE" == "force" ]; then 
+    # Checks to see if data has already been migrated and skips if it has. 
+    if [ ! -f "/opt/CumulusMX/config/.migrated" ] && [ ! -f "/opt/CumulusMX/config/.nodata" ] || [ "$MIGRATE" == "force" ]; then 
       echo "Migration has not been completed. Starting migration..."
 
       # Backup Cumulus.ini file
