@@ -2,6 +2,8 @@
 
 # Migrate v3 to v4 functionality
 
+echo "MIGRATE is: $MIGRATE"
+
 # Enables migration if the environment variable is set
 if [ "$MIGRATE" ]; then
 echo "Migration enabled. Starting migration..."
