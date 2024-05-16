@@ -5,7 +5,7 @@
 echo "MIGRATE is: $MIGRATE"
 
 # Enables migration if the environment variable is set
-if [ "$MIGRATE" ]; then
+if [ "$MIGRATE" = "true" ]; then
 echo "Migration enabled. Starting migration..."
   # Checks to see if data has already been migrated and skips if it has. 
   if [ ! -f "/opt/CumulusMX/config/.migrated" ]; then 
