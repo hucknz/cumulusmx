@@ -2,13 +2,12 @@
 
 # Migrate v3 to v4 functionality
 
-echo "MIGRATE is: $MIGRATE"
-
 # Enables migration if the environment variable is set
-if [ "$MIGRATE" = "true" ]; then
-echo "Migration enabled. Starting migration..."
+if [ "$MIGRATE" == "true" ]; then
+echo "Migration enabled. Checking if migration has already been completed..."
   # Checks to see if data has already been migrated and skips if it has. 
   if [ ! -f "/opt/CumulusMX/config/.migrated" ]; then 
+  echo "Migration has not been completed. Starting migration..."
     # Backup Cumulus.ini file
     cp -R /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/config/Cumulus-v3.ini.bak
     # Copy Cumulus.ini to root
