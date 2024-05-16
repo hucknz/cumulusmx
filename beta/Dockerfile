@@ -41,8 +41,7 @@ RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
 ARG CACHEBUST=1
 
 # Download Latest Cumulus MX
-RUN #curl -L $(curl -s https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest | grep browser_ | cut -d\" -f4) --output /tmp/CumulusMX.zip && \
-    curl -L https://github.com/cumulusmx/CumulusMX/releases/download/b4022/CumulusMXDist4022.zip --output /tmp/CumulusMX.zip && \
+RUN curl -L https://github.com/cumulusmx/CumulusMX/releases/download/b4022/CumulusMXDist4022.zip --output /tmp/CumulusMX.zip && \
     mkdir -p /opt/CumulusMX/publicweb /tmp/web && \
     unzip /tmp/CumulusMX.zip -d /opt/ && \
     chmod +x /opt/CumulusMX/CumulusMX.exe && \
