@@ -9,6 +9,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - MIGRATE=false # Optional for v4 only. Set to true if you'd like to migrate from v3 to v4. Can be omitted or set to false if you don't want to run a migration. 
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKERCONFDIR}/cumulusmx/data:/opt/CumulusMX/data
