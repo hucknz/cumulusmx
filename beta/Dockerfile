@@ -23,6 +23,7 @@ LABEL Maintainer="hucknz"
 # Config Info
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=ETC/UTC
+ENV MIGRATE=false
 SHELL ["/bin/bash", "-c"]
 
 # Install required packages
