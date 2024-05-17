@@ -7,7 +7,7 @@ if [ "$MIGRATE" != "false" ]; then
 echo "Migration enabled. Begin migration checks..."
 
   # Checks if there is more than 1 file in the data folder (indicates new install or existing)
-  if [ "$(ls -A /opt/CumulusMX/data/ | wc -l)" -gt 1 ]; then 
+  if [ "$(ls -A /opt/CumulusMX/data/ | wc -l)" -gt 1 ]|| [ "$MIGRATE" == "force" ]; then 
   echo "Multiple files detected. Checking if migration has already been completed..."
 
     # Checks to see if data has already been migrated and skips migration if it has. 
@@ -39,7 +39,7 @@ echo "Migration enabled. Begin migration checks..."
       # Run migration script
       echo "Running migration task..."
       expect <<EOF
-spawn dotnet MigrateData3to4.dll
+spawn dotnet MigrateData3to4.dll $MIGRATE_CUSTOM_LOG_FILES
 expect "Press a Enter to continue, or Ctrl-C to exit"
 send "\r"
 expect "Press Enter to exit"
