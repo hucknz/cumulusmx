@@ -2,19 +2,6 @@
 # Cumulus MX Dockerfile
 #
 # Thanks to https://github.com/Optoisolated/MXWeather
-#
-# Notes:
-#
-# In order to prevent docker from turning Cumulus.ini into a folder, you need to touch it first
-# eg. touch ${DOCKERCONFDIR}/cumulusmx/Cumulus.ini
-#
-# To allow USB Weather Station Support (eg. FineOffset), add the following switch to the run command.
-#            --device=/dev/hidraw0
-#            hidraw0 would be the USB device as shown on the host machines /dev/hidraw* list.
-#            If you have more than one USB device, you may need to change the number at the end
-#            to the correct USB device ID. (eg. hidraw0, hidraw1, hidraw2)
-
-# Weather data, logs, templates, and settings are persistent outside of the container
 
 # Pull base image
 FROM mcr.microsoft.com/dotnet/runtime:8.0
