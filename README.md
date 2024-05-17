@@ -7,13 +7,13 @@ Cumulus MX is a cross platform version of the Cumulus weather station software. 
 
 Because of the breaking changes between v3 and v4 I've added a new tagging format. 
 
-"cumulusmx:v4" will be available for all new releases going forward. This will automatically be updated as new versions are released. **The "cumulusmx:latest" tag will shift to v4 in July.** You can choose to use v4 by changing to that tag earlier if you'd prefer. 
+`cumulusmx:v4` will be available for all new releases going forward. This will automatically be updated as new versions are released. **The `cumulusmx:latest` tag will shift to v4 in July.** You can choose to use v4 by changing to that tag earlier if you'd prefer. 
 
-"cumulusmx:v3" will remain available for version 3 builds. These will be updated monthly to avoid the containers going stale or security flaws being left open. 
+`cumulusmx:v3` will remain available for version 3 builds. These will be updated monthly to avoid the containers going stale or security flaws being left open. 
 
 ### Data migration ###
 
-v4 has a completely new data structure, therefore your files will need to be migrated. **The v4 release migrates from the v3 to the v4 data structure by default.** You can disable the migration by adding an environment variable "MIGRATE=false" to your docker-compose or "-e MIGRATE=false" for docker run. If you use Custom Daily log files you will need to pass a list of these through an environment variable too. See migration detail below for more information. 
+v4 has a completely new data structure, therefore your files will need to be migrated. **The v4 release migrates from the v3 to the v4 data structure by default.** You can disable the migration by adding an environment variable `MIGRATE=false` to your docker-compose or `-e MIGRATE=false` for docker run. If you use Custom Daily log files you will need to pass a list of these through an environment variable too. See migration detail below for more information. 
 
 **Please ensure you back up your data files before updating to v4. I can not guarantee the migration will work correctly for you.**
 
@@ -55,18 +55,18 @@ If you have Custom Daily log files you can pass these to the script by setting a
 If any of these fails the migration will not proceed: 
 1. Check if migration is disabled
 2. Check if there is more than one file in the data directory
- a. If the migration is skipped a file `/config/.nodata` is created to indicate the migration has been skipped so that the migration is not run next time the container is started
+ a. If the migration is skipped a file `/opt/CumulusMX/config/.nodata` is created to indicate the migration has been skipped so that the migration is not run next time the container is started
 3. Check if there has been a pre-existing migration
 
-If `MIGRATION=force` is set then checks will be ignored and the migration will run
+If `MIGRATION=force` is set then checks will be ignored and the migration will run. 
 
 ### Migration
 
-1. The Cumulus.ini files is backed up to `/config/Cumulus-v3.ini.bak`
-2. The data directory is backed up to `/backup/datav3`
-3. The data directory is copied to `/datav3`
+1. The Cumulus.ini files is backed up to `/opt/CumulusMX/config/Cumulus-v3.ini.bak`
+2. The data directory is backed up to `/opt/CumulusMX/backup/datav3`
+3. The data directory is copied to `/opt/CumulusMX/datav3`
 4. The migration process is run
-5. Once the migration has run a file `/config/.migrated` is created to indicate the migration has been completed
+5. Once the migration has run a file `/opt/CumulusMX/config/.migrated` is created to indicate the migration has been completed
 6. CumulusMX will then start as usual
 
 ### Recovery
@@ -74,11 +74,11 @@ If `MIGRATION=force` is set then checks will be ignored and the migration will r
 The migration process is designed to make the data recoverable but there is no guarantee provided. 
 
 If you need to recover there should be a copy of the necessary files available in the following locations: 
-1. Cumulus.ini should be located at /config/Cumulus-v3.ini.bak
-2. The v3 data files should be available at /backups/datav3
+1. Cumulus.ini should be located at `/opt/CumulusMX/config/Cumulus-v3.ini.bak`
+2. The v3 data files should be available at `/opt/CumulusMX/backups/datav3`
 
 Replacing `/config/Cumulus-v3.ini.bak` with `/config/Cumulus.ini` and copying `/backup/datav3/` to `/data/` **should** restore things back to v3. 
 
 # Thanks
 
-Credit to [@optoisolated](https://github.com/optoisolated/MXWeather) for their initial work in containerising Cumulus MX. 
+Thanks to [@optoisolated](https://github.com/optoisolated/MXWeather) for their initial work in containerising Cumulus MX. 
