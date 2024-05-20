@@ -1,4 +1,4 @@
-name: Check dotnet Base Image Hash
+name: Check for new dotnet image
 
 on:
   schedule:
