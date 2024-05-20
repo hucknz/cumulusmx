@@ -25,13 +25,17 @@ jobs:
 
       - name: Get previous hash
         id: get_previous_hash
-        run: echo "PREVIOUS_HASH=$(cat upstream-releases/dotnet_hash.txt)" >> $GITHUB_ENV
+        run: |
+          PREVIOUS_HASH=$(cat upstream-releases/dotnet_hash.txt) || echo "PREVIOUS_HASH=" >> $GITHUB_ENV
+          echo "## outputs"
+          echo "PREVIOUS_HASH=$PREVIOUS_HASH"
 
       - name: Compare hashes
         id: compare_hashes
+        needs: get_previous_hash
         run: |
-          if [ -n "${{ steps.get_previous_hash.outputs.previous_hash }}" ]; then
-            if [ "${{ steps.get_previous_hash.outputs.previous_hash }}" = "${{ env.CURRENT_HASH }}" ]; then
+          if [ -n "$${{ needs.get_previous_hash.outputs.PREVIOUS_HASH }}" ]; then
+            if [ "$${{ needs.get_previous_hash.outputs.PREVIOUS_HASH }}" = "${{ env.CURRENT_HASH }}" ]; then
               echo "Hashes match. No change detected."
             else
               echo "Hashes differ. There's a change in the image."
