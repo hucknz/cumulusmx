@@ -26,7 +26,7 @@ jobs:
       - name: Get previous hash
         id: get_previous_hash
         run: |
-          PREVIOUS_HASH=$(cat upstream-releases/dotnet_hash.txt) || echo "PREVIOUS_HASH=" >> $GITHUB_ENV
+          PREVIOUS_HASH=$(cat upstream-releases/dotnet_hash.txt)
           echo "## outputs"
           echo "PREVIOUS_HASH=$PREVIOUS_HASH"
 
