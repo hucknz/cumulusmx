@@ -39,6 +39,12 @@ jobs:
             else
               echo "Releases differ. There has been a new release."
               echo "${{ env.NEW_VERSION }}" > upstream-releases/cumulusmx-latest.txt
+              # Trigger the build-and-push workflow
+              curl -X POST \
+              -H "Accept: application/vnd.github.everest-preview+json" \
+              -H "Authorization: Bearer ${{ secrets.PAT }}" \
+              https://api.github.com/repos/owner/repo/dispatches \
+              -d '{"event_type": "v4-build-and-push"}'
               echo "MODIFIED=true" >> $GITHUB_ENV
             fi
           fi
