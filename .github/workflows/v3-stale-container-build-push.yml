@@ -31,7 +31,7 @@ jobs:
 
       - name: Check out the repo
         id: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         
       - name: Set up QEMU
         id: setup_qemu
