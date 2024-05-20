@@ -35,16 +35,18 @@ jobs:
           if [ -n "${{ env.PREVIOUS_HASH }}" ]; then
             if [ "${{ env.PREVIOUS_HASH }}" = "${{ env.CURRENT_HASH }}" ]; then
               echo "Hashes match. No change detected."
+              echo "MODIFIED=false" >> $GITHUB_ENV
             else
               echo "Hashes differ. There's a change in the image."
               echo "${{ env.CURRENT_HASH }}" > upstream-releases/dotnet_hash.txt
+              echo "MODIFIED=true" >> $GITHUB_ENV
             fi
           else
             echo "Previous hash not found. This is likely the first run."
             echo "${{ env.CURRENT_HASH }}" > upstream-releases/dotnet_hash.txt
           fi
       - name: Commit latest hash
-        if: steps.git-check.outputs.modified == 'true'
+        if: env.MODIFIED == 'true'
         run: |
           git config --global user.name 'hucknz'
           git config --global user.email '12265772+hucknz@users.noreply.github.com'
