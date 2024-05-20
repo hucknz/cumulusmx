@@ -14,15 +14,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
       - name: Pull Docker image
         run: docker pull ubuntu:24.04
+
       - name: Export Docker image filesystem
         run: |
           CURRENT_HASH=$(docker save ubuntu:24.04 | tar -xO | shasum -a 256 | cut -d' ' -f1)
-          echo "::set-env name=CURRENT_HASH::$CURRENT_HASH"
+          echo "CURRENT_HASH=$CURRENT_HASH" >> $GITHUB_ENV
+
       - name: Get previous hash
         id: get_previous_hash
-        run: echo "::set-output name=previous_hash::$(cat upstream-releases/ubuntu_hash.txt)" || echo "::set-output name=previous_hash::"
+        run: echo "PREVIOUS_HASH=$(cat upstream-releases/ubuntu_hash.txt)" >> $GITHUB_ENV || echo "PREVIOUS_HASH=" >> $GITHUB_ENV
+
       - name: Compare hashes
         id: compare_hashes
         run: |
