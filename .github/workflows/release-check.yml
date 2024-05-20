@@ -14,22 +14,40 @@ jobs:
   get-version:
     runs-on: ubuntu-latest
     steps:
-      
+
       - uses: actions/checkout@v3
         with:
           token: ${{ secrets.PAT }}
 
-      - name: Fetch release version
-        run: bash release-check.sh
+      - name: Get current version number
+        run: |
+          CURRENT_VERSION=$(cat upstream-releases/cumulusmx-latest.txt)
+          echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+  
+      - name: Get latest version number
+        run: |
+          RELEASE_DATA=$(curl -sL "https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest" 2>/dev/null)
+          NEW_VERSION=$(echo "$RELEASE_DATA" | jq -r '.tag_name')
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+  
+      - name: Compare version numbers
+        run: |
+          if [ -n "${{ env.CURRENT_VERSION }}" ]; then
+            if [ "${{ env.CURRENT_VERSION }}" = "${{ env.NEW_VERSION }}" ]; then
+              echo "Releases match. No change detected."
+              echo "MODIFIED=false" >> $GITHUB_ENV
+            else
+              echo "Releases differ. There has been a new release."
+              echo "${{ env.NEW_VERSION }}" > upstream-releases/cumulusmx-latest.txt
+              echo "MODIFIED=true" >> $GITHUB_ENV
+            fi
+          fi
 
-      - name: Check for modified files
-        id: git-check
-        run: echo "modified=$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")" >> $GITHUB_OUTPUT
-
-      - name: Commit latest release version
-        if: steps.git-check.outputs.modified == 'true'
+      - name: Commit latest hash
+        if: env.MODIFIED == 'true'
         run: |
           git config --global user.name 'hucknz'
           git config --global user.email '12265772+hucknz@users.noreply.github.com'
           git commit -am "New release version found"
           git push
+  
