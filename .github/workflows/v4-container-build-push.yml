@@ -17,6 +17,10 @@ on:
   # Allow manual trigger
   workflow_dispatch:
 
+  # Trigger from other workflows
+  repository_dispatch:
+    types: [v4-build-and-push]
+
   # Trigger monthly to ensure images aren't too stale
   #schedule:
   #  - cron:  '51 19 1 * *'
