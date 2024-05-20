@@ -29,7 +29,6 @@ jobs:
 
       - name: Compare hashes
         id: compare_hashes
-        needs: get_previous_hash
         run: |
           if [ -n "${{ steps.get_previous_hash.outputs.previous_hash }}" ]; then
             if [ "${{ steps.get_previous_hash.outputs.previous_hash }}" = "${{ env.CURRENT_HASH }}" ]; then
