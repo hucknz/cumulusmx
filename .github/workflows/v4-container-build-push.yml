@@ -10,9 +10,9 @@ name: v4 build and push
 
 on:
   # Automatically trigger when upstream release file is changed
-  push:
-    paths:
-      - 'upstream-releases/cumulusmx-latest.txt'
+  #push:
+  #  paths:
+  #    - 'upstream-releases/cumulusmx-latest.txt'
 
   # Allow manual trigger
   workflow_dispatch:
