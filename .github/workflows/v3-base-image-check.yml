@@ -1,4 +1,4 @@
-name: Check for new dotnet image
+name: Check for new Ubuntu image
 
 on:
   schedule:
