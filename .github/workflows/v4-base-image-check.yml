@@ -49,3 +49,10 @@ jobs:
             echo "Previous hash not found. This is likely the first run."
             echo "${{ env.CURRENT_HASH }}" > upstream-releases/dotnet_hash.txt
           fi
+      - name: Commit latest hash
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          git config --global user.name 'hucknz'
+          git config --global user.email '12265772+hucknz@users.noreply.github.com'
+          git commit -am "New dotnet hash found"
+          git push
