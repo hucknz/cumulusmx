@@ -1,4 +1,4 @@
-name: Check Ubuntu Image Hash
+name: Check dotnet Base Image Hash
 
 on:
   schedule:
@@ -18,7 +18,7 @@ jobs:
       - name: Pull Docker image
         run: docker pull ubuntu:24.04
 
-      - name: Export Docker image filesystem
+      - name: Get current hash
         run: |
           CURRENT_HASH=$(docker save ubuntu:24.04 | tar -xO | shasum -a 256 | cut -d' ' -f1)
           echo "CURRENT_HASH=$CURRENT_HASH" >> $GITHUB_ENV
@@ -27,25 +27,28 @@ jobs:
         id: get_previous_hash
         run: |
           PREVIOUS_HASH=$(cat upstream-releases/ubuntu_hash.txt)
-          echo "PREVIOUS_HASH=$PREVIOUS_HASH" >> $GITHUB_ENV || echo "PREVIOUS_HASH=" >> $GITHUB_ENV
+          echo "PREVIOUS_HASH=$PREVIOUS_HASH" >> $GITHUB_ENV
 
       - name: Compare hashes
         id: compare_hashes
         run: |
-          if [ -n "${{ steps.get_previous_hash.outputs.previous_hash }}" ]; then
-            if [ "${{ steps.get_previous_hash.outputs.previous_hash }}" = "${{ env.CURRENT_HASH }}" ]; then
+          if [ -n "${{ env.PREVIOUS_HASH }}" ]; then
+            if [ "${{ env.PREVIOUS_HASH }}" = "${{ env.CURRENT_HASH }}" ]; then
               echo "Hashes match. No change detected."
+              echo "MODIFIED=false" >> $GITHUB_ENV
             else
               echo "Hashes differ. There's a change in the image."
               echo "${{ env.CURRENT_HASH }}" > upstream-releases/ubuntu_hash.txt
-              # Trigger the build-and-push workflow
-              curl -X POST \
-              -H "Accept: application/vnd.github.everest-preview+json" \
-              -H "Authorization: Bearer ${{ secrets.PAT }}" \
-              https://api.github.com/repos/owner/repo/dispatches \
-              -d '{"event_type": "v3-build-and-push"}'
+              echo "MODIFIED=true" >> $GITHUB_ENV
             fi
           else
             echo "Previous hash not found. This is likely the first run."
             echo "${{ env.CURRENT_HASH }}" > upstream-releases/ubuntu_hash.txt
           fi
+      - name: Commit latest hash
+        if: env.MODIFIED == 'true'
+        run: |
+          git config --global user.name 'hucknz'
+          git config --global user.email '12265772+hucknz@users.noreply.github.com'
+          git commit -am "New Ubuntu hash found"
+          git push
