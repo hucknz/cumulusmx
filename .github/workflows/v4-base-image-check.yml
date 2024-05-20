@@ -25,7 +25,7 @@ jobs:
 
       - name: Get previous hash
         id: get_previous_hash
-        run: echo "PREVIOUS_HASH=$(cat dotnet_hash.txt)" >> $GITHUB_ENV || echo "PREVIOUS_HASH=" >> $GITHUB_ENV
+        run: echo "PREVIOUS_HASH=$(cat upstream-releases/dotnet_hash.txt)" >> $GITHUB_ENV || echo "PREVIOUS_HASH=" >> $GITHUB_ENV
 
       - name: Compare hashes
         id: compare_hashes
@@ -35,7 +35,7 @@ jobs:
               echo "Hashes match. No change detected."
             else
               echo "Hashes differ. There's a change in the image."
-              echo "${{ env.CURRENT_HASH }}" > dotnet_hash.txt
+              echo "${{ env.CURRENT_HASH }}" > upstream-releases/dotnet_hash.txt
               # Trigger the build-and-push workflow
               curl -X POST \
               -H "Accept: application/vnd.github.everest-preview+json" \
@@ -45,5 +45,5 @@ jobs:
             fi
           else
             echo "Previous hash not found. This is likely the first run."
-            echo "${{ env.CURRENT_HASH }}" > dotnet_hash.txt
+            echo "${{ env.CURRENT_HASH }}" > upstream-releases/dotnet_hash.txt
           fi
