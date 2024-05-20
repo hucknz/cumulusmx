@@ -4,6 +4,9 @@ on:
   schedule:
     - cron:  '12 19 * * *'
 
+  # Allow manual trigger
+  workflow_dispatch:
+
 jobs:
   check_image_hash:
     runs-on: ubuntu-latest
