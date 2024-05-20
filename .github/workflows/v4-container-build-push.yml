@@ -12,7 +12,7 @@ on:
   # Automatically trigger when upstream release file is changed
   push:
     paths:
-      - 'upstream-releases/*'
+      - 'upstream-releases/cumulusmx-latest.txt'
 
   # Allow manual trigger
   workflow_dispatch:
@@ -20,10 +20,6 @@ on:
   # Trigger from other workflows
   repository_dispatch:
     types: [v4-build-and-push]
-
-  # Trigger monthly to ensure images aren't too stale
-  #schedule:
-  #  - cron:  '51 19 1 * *'
 
 
 jobs:
