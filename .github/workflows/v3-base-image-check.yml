@@ -25,7 +25,9 @@ jobs:
 
       - name: Get previous hash
         id: get_previous_hash
-        run: echo "PREVIOUS_HASH=$(cat upstream-releases/ubuntu_hash.txt)" >> $GITHUB_ENV || echo "PREVIOUS_HASH=" >> $GITHUB_ENV
+        run: |
+          PREVIOUS_HASH=$(cat upstream-releases/ubuntu_hash.txt)
+          echo "PREVIOUS_HASH=$PREVIOUS_HASH" >> $GITHUB_ENV || echo "PREVIOUS_HASH=" >> $GITHUB_ENV
 
       - name: Compare hashes
         id: compare_hashes

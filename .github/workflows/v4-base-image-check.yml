@@ -26,16 +26,14 @@ jobs:
       - name: Get previous hash
         id: get_previous_hash
         run: |
-          PREVIOUS_HASH=$(cat upstream-releases/dotnet_hash.txt)
-          echo "## outputs"
-          echo "PREVIOUS_HASH=$PREVIOUS_HASH"
+          PREVIOUS_HASH=$(cat upstream-releases/ubuntu_hash.txt)
+          echo "PREVIOUS_HASH=$PREVIOUS_HASH" >> $GITHUB_ENV || echo "PREVIOUS_HASH=" >> $GITHUB_ENV
 
       - name: Compare hashes
         id: compare_hashes
-        needs: get_previous_hash
         run: |
-          if [ -n "$${{ needs.get_previous_hash.outputs.PREVIOUS_HASH }}" ]; then
-            if [ "$${{ needs.get_previous_hash.outputs.PREVIOUS_HASH }}" = "${{ env.CURRENT_HASH }}" ]; then
+          if [ -n "$${{ env.PREVIOUS_HASH }}" ]; then
+            if [ "$${{ env.PREVIOUS_HASH }}" = "${{ env.CURRENT_HASH }}" ]; then
               echo "Hashes match. No change detected."
             else
               echo "Hashes differ. There's a change in the image."
