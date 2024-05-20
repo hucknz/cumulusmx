@@ -19,7 +19,7 @@ on:
 
   # Trigger from other workflows
   repository_dispatch:
-    types: [v4-build-and-push]
+    types: [v4_start_build]
 
 
 jobs:
