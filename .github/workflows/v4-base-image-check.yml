@@ -18,7 +18,7 @@ jobs:
       - name: Pull Docker image
         run: docker pull mcr.microsoft.com/dotnet/runtime:8.0
 
-      - name: Export Docker image filesystem
+      - name: Get current hash
         run: |
           CURRENT_HASH=$(docker save mcr.microsoft.com/dotnet/runtime:8.0 | tar -xO | shasum -a 256 | cut -d' ' -f1)
           echo "CURRENT_HASH=$CURRENT_HASH" >> $GITHUB_ENV
@@ -26,7 +26,7 @@ jobs:
       - name: Get previous hash
         id: get_previous_hash
         run: |
-          PREVIOUS_HASH=$(cat upstream-releases/dotnet_hash.txt)
+          PREVIOUS_HASH=$(cat upstream-releases/dotnet_hash.txt | tr -d '\n')
           echo "PREVIOUS_HASH=$PREVIOUS_HASH" >> $GITHUB_ENV
 
       - name: Compare hashes
