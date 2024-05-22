@@ -10,15 +10,20 @@ on:
 jobs:
   check_image_hash:
     runs-on: ubuntu-latest
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
     steps:
       - name: Checkout repository
+        id: checkout_repository
         uses: actions/checkout@v4
 
       - name: Pull Docker image
+        id: pull_latest_image
         run: docker pull mcr.microsoft.com/dotnet/runtime:8.0
 
       - name: Get current hash
+        id: get_current_hash
         run: |
           CURRENT_HASH=$(docker save mcr.microsoft.com/dotnet/runtime:8.0 | tar -xO | shasum -a 256 | cut -d' ' -f1)
           echo "CURRENT_HASH=$CURRENT_HASH" >> $GITHUB_ENV
@@ -52,9 +57,19 @@ jobs:
             echo "${{ env.CURRENT_HASH }}" > upstream-releases/dotnet_hash.txt
           fi
       - name: Commit latest hash
+        id: commit_latest_hash
         if: env.MODIFIED == 'true'
         run: |
           git config --global user.name 'hucknz'
           git config --global user.email '12265772+hucknz@users.noreply.github.com'
           git commit -am "New dotnet hash found"
           git push
+
+      - name: Notify outcome to Slack
+        id: notify_result
+        uses: act10ns/slack@v2
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          message: dotnet base image check was a ${{ job.status }}
+        if: failure()
