@@ -10,15 +10,20 @@ on:
 jobs:
   check_image_hash:
     runs-on: ubuntu-latest
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
     steps:
       - name: Checkout repository
+        id: checkout_repository
         uses: actions/checkout@v4
 
       - name: Pull Docker image
+        id: pull_latest_image
         run: docker pull ubuntu:24.04
 
       - name: Get current hash
+        id: get_current_hash
         run: |
           CURRENT_HASH=$(docker save ubuntu:24.04 | tar -xO | shasum -a 256 | cut -d' ' -f1)
           echo "CURRENT_HASH=$CURRENT_HASH" >> $GITHUB_ENV
@@ -39,6 +44,12 @@ jobs:
             else
               echo "Hashes differ. There's a change in the image."
               echo "${{ env.CURRENT_HASH }}" > upstream-releases/ubuntu_hash.txt
+              # Trigger the build-and-push workflow
+              curl -X POST \
+              -H "Accept: application/vnd.github.everest-preview+json" \
+              -H "Authorization: Bearer ${{ secrets.PAT }}" \
+              https://api.github.com/repos/owner/repo/dispatches \
+              -d '{"event_type": "v3-start-build"}'
               echo "MODIFIED=true" >> $GITHUB_ENV
             fi
           else
@@ -46,9 +57,19 @@ jobs:
             echo "${{ env.CURRENT_HASH }}" > upstream-releases/ubuntu_hash.txt
           fi
       - name: Commit latest hash
+        id: commit_latest_hash
         if: env.MODIFIED == 'true'
         run: |
           git config --global user.name 'hucknz'
           git config --global user.email '12265772+hucknz@users.noreply.github.com'
           git commit -am "New Ubuntu hash found"
           git push
+
+      - name: Notify outcome to Slack
+        id: notify_result
+        uses: act10ns/slack@v2
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          message: Ubuntu base image check was a ${{ job.status }}
+        if: failure()
