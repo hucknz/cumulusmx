@@ -72,4 +72,4 @@ jobs:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
           message: dotnet base image check was a ${{ job.status }}
-        if: failure()
+        if: always()
