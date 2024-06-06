@@ -12,11 +12,6 @@ on:
   # Allow manual trigger
   workflow_dispatch:
 
-  # Trigger from other workflows
-  repository_dispatch:
-    types: [v4_start_build]
-
-
 jobs:
   build_and_push:
     name: v4 build and push

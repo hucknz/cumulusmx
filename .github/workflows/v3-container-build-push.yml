@@ -1,6 +1,6 @@
-name: v4 monthly build and push
+name: v3 build and push
 
-# This workflow is triggered by an update to the upstream-releases file (which is triggered by the check-releases workflow).
+# This workflow is triggered by an update to the base image.
 # When triggered the latest version of the container is built and pushed to docker hub
 
 # This workflow uses actions that are not certified by GitHub.
@@ -13,14 +13,10 @@ on:
   # Allow manual trigger
   workflow_dispatch:
 
-  # Trigger monthly to ensure images aren't too stale
-  schedule:
-    - cron:  '51 19 1 * *'
-
 
 jobs:
   build_and_push:
-    name: v4 monthly build and push
+    name: v3 monthly build and push
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -28,35 +24,20 @@ jobs:
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
-        
-      - name: Get latest version number
-        id: get_version
-        run: |
-          VER=$(curl -s https://raw.githubusercontent.com/hucknz/cumulusmx/master/upstream-releases/cumulusmx-latest.txt)
-          echo "VERSION=$VER" >> $GITHUB_ENV
 
       - name: Check out the repo
         id: checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Required to count the commits
-        
-      - name: Get date of most recent commit
-        id: get_date
-        run: echo "MODIFIED=$(git log --oneline --since '24 hours ago' ./upstream-releases/cumulusmx-latest.txt | wc -l)" >> $GITHUB_ENV
         
       - name: Set up QEMU
-        if: ${{ env.MODIFIED < 1 }}
         id: setup_qemu
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        if: ${{ env.MODIFIED < 1 }}
         id: setup_buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to Docker Hub
-        if: ${{ env.MODIFIED < 1 }}
         id: authenticate_dockerhub
         uses: docker/login-action@v3
         with:
@@ -64,7 +45,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Log in to the ghcr.io
-        if: ${{ env.MODIFIED < 1 }}
         id: authenticate_ghcr
         uses: docker/login-action@v3
         with:
@@ -73,7 +53,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
-        if: ${{ env.MODIFIED < 1 }}
         id: extract_metadata
         uses: docker/metadata-action@v5
         with:
@@ -81,15 +60,15 @@ jobs:
             hucknz/cumulusmx
             ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=${{ env.VERSION }}
-            type=raw,value=v4
+            type=raw,value=b3283
+            type=raw,value=v3
+            type=raw,value=latest
 
       - name: Build and push Docker images
-        if: ${{ env.MODIFIED < 1 }}
         id: build_images
         uses: docker/build-push-action@v5
         with:
-          context: v4
+          context: v3
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.extract_metadata.outputs.tags }}
@@ -101,5 +80,5 @@ jobs:
         with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
-          message: CumulusMX v4 build and publish containers was a ${{ job.status }}
+          message: CumulusMX v3 build and publish containers was a ${{ job.status }}
         if: always()
