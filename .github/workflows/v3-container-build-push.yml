@@ -3,11 +3,6 @@ name: v3 build and push
 # This workflow is triggered by an update to the base image.
 # When triggered the latest version of the container is built and pushed to docker hub
 
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 on:
 
   # Allow manual trigger
