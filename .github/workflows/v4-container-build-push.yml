@@ -4,12 +4,6 @@ name: v4 build and push
 # When triggered the latest version of the container is built and pushed to docker hub
 
 on:
-  # Automatically trigger when upstream release file is changed
-  #push:
-  #  paths:
-  #    - 'upstream-releases/cumulusmx-latest.txt'
-
-  # Allow manual trigger
   workflow_dispatch:
 
 jobs:
