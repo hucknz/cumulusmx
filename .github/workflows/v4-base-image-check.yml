@@ -56,6 +56,7 @@ jobs:
             echo "Previous hash not found. This is likely the first run."
             echo "${{ env.CURRENT_HASH }}" > upstream-releases/dotnet_hash.txt
           fi
+
       - name: Commit latest hash
         id: commit_latest_hash
         if: env.MODIFIED == 'true'
@@ -65,11 +66,20 @@ jobs:
           git commit -am "New dotnet hash found"
           git push
 
-      - name: Notify outcome to Slack
-        id: notify_result
+      - name: Notify new image found to Slack
+        id: notify_new_image
+        if: env.MODIFIED == 'true'
         uses: act10ns/slack@v2
         with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
-          message: dotnet base image check was a ${{ job.status }}
-        if: always()
+          message: "A new dotnet base image was found. The build and push workflow has been triggered."
+
+      - name: Notify failure to Slack
+        id: notify_failure
+        if: failure()
+        uses: act10ns/slack@v2
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          message: "dotnet base image check was a ${{ job.status }}"
