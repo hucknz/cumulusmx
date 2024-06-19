@@ -66,7 +66,7 @@ jobs:
         with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
-          message: "A new Uptime Kuma version was found. The build and push workflow has been triggered."
+          message: "A new CumulusMX version was found. The build and push workflow has been triggered."
       
       - name: Notify failure to Slack
         id: notify_failure
@@ -75,4 +75,4 @@ jobs:
         with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
-          message: "Uptime Kuma release check was a ${{ job.status }}"
+          message: "CumulusMX release check was a ${{ job.status }}"
