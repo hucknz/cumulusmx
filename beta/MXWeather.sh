@@ -114,9 +114,13 @@ dotnet /opt/CumulusMX/CumulusMX.dll >> /var/log/nginx/CumulusMX.log &
 pid="$!"
 echo "Starting CumulusMX..."
 
+# Find the latest log file
+logfile="$(ls -1 /opt/CumulusMX/MXdiags | grep -E '^[0-9]{8}-[0-9]{6}\.txt$' | sort | tail -n 1)"
+
 # Send log file to stdout
-sleep 5
-tail -f "$(ls -1 /opt/CumulusMX/MXdiags | grep -E '^[0-9]{8}-[0-9]{6}\.txt$' | sort | tail -n 1 | sed 's|^|/opt/CumulusMX/MXdiags/|')"
+echo "Loading log file: $logfile"
+sleep 2
+tail -n +1 -f "/opt/CumulusMX/MXdiags/$logfile"
 
 # Wait forever
 while true
