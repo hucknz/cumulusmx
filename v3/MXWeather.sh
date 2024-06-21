@@ -9,7 +9,6 @@ cp -Rn /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
 # Copy Public Web Templates
 cp -Rn /tmp/web/* /opt/CumulusMX/web/
 
-set -x
 pid=0
 
 # SIGTERM-handler
@@ -30,6 +29,14 @@ trap 'kill ${!}; term_handler' SIGTERM
 cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/
 mono /opt/CumulusMX/CumulusMX.exe >> /var/log/nginx/CumulusMX.log &
 pid="$!"
+
+# Find the latest log file
+logfile="$(ls -1 /opt/CumulusMX/MXdiags | grep -E '^[0-9]{8}-[0-9]{6}\.txt$' | sort | tail -n 1)"
+
+# Send log file to stdout
+echo "Loading log file: $logfile"
+sleep 2
+tail -n +1 -f "/opt/CumulusMX/MXdiags/$logfile"
 
 # wait forever
 while true
