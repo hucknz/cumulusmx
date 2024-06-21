@@ -81,7 +81,6 @@ cp -Rn /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
 # Copy Public Web templates
 cp -Rn /tmp/web/* /opt/CumulusMX/web/
 
-set -x
 pid=0
 
 # SIGTERM-handler
@@ -112,6 +111,14 @@ if [ -f "/opt/CumulusMX/config/Cumulus.ini" ]; then
 fi
 dotnet /opt/CumulusMX/CumulusMX.dll >> /var/log/nginx/CumulusMX.log &
 pid="$!"
+
+# Find the latest log file
+logfile="$(ls -1 /opt/CumulusMX/MXdiags | grep -E '^[0-9]{8}-[0-9]{6}\.txt$' | sort | tail -n 1)"
+
+# Send log file to stdout
+echo "Loading log file: $logfile"
+sleep 2
+tail -n +1 -f "/opt/CumulusMX/MXdiags/$logfile"
 
 # Wait forever
 while true
