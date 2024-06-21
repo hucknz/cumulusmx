@@ -81,10 +81,10 @@ cp -Rn /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
 # Copy Public Web templates
 cp -Rn /tmp/web/* /opt/CumulusMX/web/
 
-set -x
+# Handle container shutdown
 pid=0
 
-# SIGTERM-handler
+# SIGTERM handler copies files to config folder when container stops
 term_handler() {
   if [ $pid -ne 0 ]; then
     kill -SIGTERM "$pid"
@@ -112,6 +112,7 @@ if [ -f "/opt/CumulusMX/config/Cumulus.ini" ]; then
 fi
 dotnet /opt/CumulusMX/CumulusMX.dll >> /var/log/nginx/CumulusMX.log &
 pid="$!"
+wait
 echo "Starting CumulusMX..."
 
 # Send log file to stdout
