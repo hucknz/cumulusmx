@@ -105,16 +105,20 @@ trap 'kill ${!}; term_handler' SIGTERM
 
 # Run application
 if [ -f "/opt/CumulusMX/config/UniqueId.txt" ]; then
-  cp -f /opt/CumulusMX/config/UniqueId.txt /opt/CumulusMX/
+  cp -f /opt/CumulusMX/config/UniqueId.txt /opt/CumulusMX/ >/dev/null 2>&1
 fi
 if [ -f "/opt/CumulusMX/config/Cumulus.ini" ]; then
-  cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/
+  cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/ >/dev/null 2>&1
 fi
 dotnet /opt/CumulusMX/CumulusMX.dll >> /var/log/nginx/CumulusMX.log &
 pid="$!"
+echo "Starting CumulusMX..."
+
+# Send log file to stdout
+tail -f "$(ls -t /opt/CumulusMX/MXdiags/ | head -n 1)" >/dev/null 2>&1
 
 # Wait forever
 while true
 do
-  tail -f /dev/null & wait ${!}
+  tail -f /dev/null & wait ${!} >/dev/null 2>&1
 done
