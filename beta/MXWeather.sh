@@ -91,10 +91,10 @@ term_handler() {
     wait "$pid"
     sleep 2
     if [ -f "/opt/CumulusMX/config/Cumulus.ini" ]; then
-      cp -f /opt/CumulusMX/Cumulus.ini /opt/CumulusMX/config/
+      cp -f /opt/CumulusMX/Cumulus.ini /opt/CumulusMX/config/ >/dev/null 2>&1
     fi
     if [ -f "/opt/CumulusMX/UniqueId.txt" ]; then
-      cp -f /opt/CumulusMX/UniqueId.txt /opt/CumulusMX/config/
+      cp -f /opt/CumulusMX/UniqueId.txt /opt/CumulusMX/config/ >/dev/null 2>&1
     fi
   fi
   exit 143; # 128 + 15 -- SIGTERM
@@ -115,7 +115,8 @@ pid="$!"
 echo "Starting CumulusMX..."
 
 # Send log file to stdout
-tail -f "$(ls -t /opt/CumulusMX/MXdiags/ | head -n 1)" >/dev/null 2>&1
+tail -f "$(ls -t /opt/CumulusMX/MXdiags | head -n 1 | sed 's|^|/opt/CumulusMX/MXdiags/|')"
+
 
 # Wait forever
 while true
