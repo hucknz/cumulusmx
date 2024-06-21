@@ -115,8 +115,7 @@ pid="$!"
 echo "Starting CumulusMX..."
 
 # Send log file to stdout
-tail -f "$(ls -t /opt/CumulusMX/MXdiags | head -n 1 | sed 's|^|/opt/CumulusMX/MXdiags/|')"
-
+tail -f "$(ls -1 /opt/CumulusMX/MXdiags | sort | tail -n 1 | sed 's|^|/opt/CumulusMX/MXdiags/|')"
 
 # Wait forever
 while true
