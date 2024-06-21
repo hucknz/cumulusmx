@@ -91,10 +91,10 @@ term_handler() {
     wait "$pid"
     sleep 2
     if [ -f "/opt/CumulusMX/config/Cumulus.ini" ]; then
-      cp -f /opt/CumulusMX/Cumulus.ini /opt/CumulusMX/config/ >/dev/null 2>&1
+      cp -f /opt/CumulusMX/Cumulus.ini /opt/CumulusMX/config/
     fi
     if [ -f "/opt/CumulusMX/UniqueId.txt" ]; then
-      cp -f /opt/CumulusMX/UniqueId.txt /opt/CumulusMX/config/ >/dev/null 2>&1
+      cp -f /opt/CumulusMX/UniqueId.txt /opt/CumulusMX/config/
     fi
   fi
   exit 143; # 128 + 15 -- SIGTERM
@@ -105,20 +105,20 @@ trap 'kill ${!}; term_handler' SIGTERM
 
 # Run application
 if [ -f "/opt/CumulusMX/config/UniqueId.txt" ]; then
-  cp -f /opt/CumulusMX/config/UniqueId.txt /opt/CumulusMX/ >/dev/null 2>&1
+  cp -f /opt/CumulusMX/config/UniqueId.txt /opt/CumulusMX/
 fi
 if [ -f "/opt/CumulusMX/config/Cumulus.ini" ]; then
-  cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/ >/dev/null 2>&1
+  cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/
 fi
 dotnet /opt/CumulusMX/CumulusMX.dll >> /var/log/nginx/CumulusMX.log &
 pid="$!"
 echo "Starting CumulusMX..."
 
 # Send log file to stdout
-tail -f "$(ls -1 /opt/CumulusMX/MXdiags | sort | tail -n 1 | sed 's|^|/opt/CumulusMX/MXdiags/|')"
+tail -f "$(ls -1 /opt/CumulusMX/MXdiags | grep -E '^[0-9]{8}-[0-9]{6}\.txt$' | sort | tail -n 1 | sed 's|^|/opt/CumulusMX/MXdiags/|')"
 
 # Wait forever
 while true
 do
-  tail -f /dev/null & wait ${!} >/dev/null 2>&1
+  tail -f /dev/null & wait ${!}
 done
