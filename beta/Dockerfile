@@ -54,4 +54,4 @@ RUN chmod +x MXWeather.sh
 EXPOSE 80
 EXPOSE 8998
 
-CMD ["./MXWeather.sh"]
+ENTRYPOINT ["./MXWeather.sh"]
