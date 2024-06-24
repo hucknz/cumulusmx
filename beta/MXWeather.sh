@@ -150,7 +150,6 @@ while true; do
 done
 
 # Wait forever to capture container shutdown command
-while true
-do
+while true; do
   tail -f /dev/null & wait ${!}
 done
