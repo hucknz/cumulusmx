@@ -123,31 +123,33 @@ get_latest_logfile() {
 latest_logfile=""
 
 # Continuously check for new log files and tail the latest one
-while true; do
-  current_logfile=$(get_latest_logfile)
-  
-  # If the latest log file has changed, update and tail the new log file
-  if [ "$current_logfile" != "$latest_logfile" ]; then
-    latest_logfile=$current_logfile
-    fullpath="/opt/CumulusMX/MXdiags/$latest_logfile"
+(
+  while true; do
+    current_logfile=$(get_latest_logfile)
     
-    echo "Loading log file: $latest_logfile"
-    
-    # Kill the previous tail process if it exists
-    if [ -n "$tail_pid" ]; then
-      kill "$tail_pid"
+    # If the latest log file has changed, update and tail the new log file
+    if [ "$current_logfile" != "$latest_logfile" ]; then
+      latest_logfile=$current_logfile
+      fullpath="/opt/CumulusMX/MXdiags/$latest_logfile"
+      
+      echo "Loading log file: $latest_logfile"
+      
+      # Kill the previous tail process if it exists
+      if [ -n "$tail_pid" ]; then
+        kill "$tail_pid"
+      fi
+      
+      # Tail the new log file in the background
+      tail -n +1 -f "$fullpath" &
+      
+      # Get the PID of the tail process
+      tail_pid=$!
     fi
     
-    # Tail the new log file in the background
-    tail -n +1 -f "$fullpath" &
-    
-    # Get the PID of the tail process
-    tail_pid=$!
-  fi
-  
-  # Sleep for a short period before checking again
-  sleep 30
-done
+    # Sleep for a short period before checking again
+    sleep 30
+  done
+) &
 
 # Wait forever to capture container shutdown command
 while true; do
