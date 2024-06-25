@@ -16,18 +16,29 @@
 
 # Weather data, logs, templates, and settings are persistent outside of the container
 
-# Pull base image
+# Stage 1: Download and prepare CumulusMX
+FROM ubuntu:24.04 AS downloader
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y curl unzip
+ARG CACHEBUST=1
+RUN curl -L https://github.com/cumulusmx/CumulusMX/releases/download/b3283/CumulusMXDist3283a.zip --output /tmp/CumulusMX.zip && \
+    mkdir -p /opt/CumulusMX/publicweb /tmp/web && \
+    unzip /tmp/CumulusMX.zip -d /opt/ && \
+    chmod +x /opt/CumulusMX/CumulusMX.exe && \
+    cp -R /opt/CumulusMX/web/* /tmp/web/ && \
+    cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
+
+# Stage 2: Build the final image
 FROM ubuntu:24.04
 LABEL Maintainer="hucknz"
 
-# Config Info
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=ETC/UTC
 SHELL ["/bin/bash", "-c"]
 
 # Install required packages
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends nginx mono-complete curl tzdata unzip libudev-dev git python3-virtualenv && \
+    apt-get install -y --no-install-recommends nginx mono-complete tzdata libudev-dev git python3-virtualenv && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -37,21 +48,14 @@ RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 
-# Ensure Cumulus MX Updates are acutally downloaded, and not cached
-ARG CACHEBUST=1
-
-# Download Latest Cumulus MX
-RUN curl -L https://github.com/cumulusmx/CumulusMX/releases/download/b3283/CumulusMXDist3283a.zip --output /tmp/CumulusMX.zip && \
-    mkdir -p /opt/CumulusMX/publicweb /tmp/web && \
-    unzip /tmp/CumulusMX.zip -d /opt/ && \
-    chmod +x /opt/CumulusMX/CumulusMX.exe && \
-    cp -R /opt/CumulusMX/web/* /tmp/web/ && \
-    cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
+# Copy CumulusMX from the downloader stage
+COPY --from=downloader /opt/CumulusMX /opt/CumulusMX
+COPY --from=downloader /tmp/web /tmp/web
 
 # Define mountable directories
 VOLUME ["/opt/CumulusMX/data","/opt/CumulusMX/backup","/opt/CumulusMX/Reports","/var/log/nginx","/opt/CumulusMX/MXdiags","/opt/CumulusMX/publicweb","/opt/CumulusMX/web"]
 
-# Add Start Script# Test File
+# Add Start Script
 COPY ./MXWeather.sh /opt/CumulusMX/
 
 # Add Nginx Config
