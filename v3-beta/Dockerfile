@@ -1,19 +1,36 @@
-# Pull base image
-FROM mono:latest
+# Build stage
+FROM ubuntu:24.04 AS builder
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=ETC/UTC
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl unzip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Download and extract CumulusMX
+ARG CACHEBUST=1
+RUN curl -L https://github.com/cumulusmx/CumulusMX/releases/download/b3283/CumulusMXDist3283a.zip --output /tmp/CumulusMX.zip && \
+    mkdir -p /opt/CumulusMX /tmp/web && \
+    unzip /tmp/CumulusMX.zip -d /opt/ && \
+    cp -R /opt/CumulusMX/web/* /tmp/web/ && \
+    cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/ && \
+    rm /tmp/CumulusMX.zip
+
+# Final stage
+FROM ubuntu:24.04
 LABEL Maintainer="hucknz"
 
-# Config Info
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=ETC/UTC
 SHELL ["/bin/bash", "-c"]
 
-# Install required packages and configure NGINX and TZData
+# Install required packages
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         nginx \
-        curl \
+        mono-complete \
         tzdata \
-        unzip \
         libudev-dev \
         git \
         python3-virtualenv && \
@@ -24,17 +41,9 @@ RUN apt-get update && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 
-# Ensure Cumulus MX Updates are actually downloaded, and not cached
-ARG CACHEBUST=1
-
-# Download and set up Latest Cumulus MX
-RUN curl -L https://github.com/cumulusmx/CumulusMX/releases/download/b3283/CumulusMXDist3283a.zip --output /tmp/CumulusMX.zip && \
-    mkdir -p /opt/CumulusMX/publicweb /tmp/web && \
-    unzip /tmp/CumulusMX.zip -d /opt/ && \
-    chmod +x /opt/CumulusMX/CumulusMX.exe && \
-    cp -R /opt/CumulusMX/web/* /tmp/web/ && \
-    cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/ && \
-    rm /tmp/CumulusMX.zip
+# Copy CumulusMX from builder stage
+COPY --from=builder /opt/CumulusMX /opt/CumulusMX
+COPY --from=builder /tmp/web /opt/CumulusMX/web
 
 # Define mountable directories
 VOLUME ["/opt/CumulusMX/data", "/opt/CumulusMX/backup", "/opt/CumulusMX/Reports", "/var/log/nginx", "/opt/CumulusMX/MXdiags", "/opt/CumulusMX/publicweb", "/opt/CumulusMX/web"]
@@ -49,7 +58,7 @@ RUN ln -s /etc/nginx/sites-available/MXWeather.conf /etc/nginx/sites-enabled/MXW
     rm /etc/nginx/sites-enabled/default
 
 WORKDIR /opt/CumulusMX/
-RUN chmod +x MXWeather.sh
+RUN chmod +x MXWeather.sh && chmod +x CumulusMX.exe
 
 # Expose ports
 EXPOSE 80 8998
