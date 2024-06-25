@@ -1,0 +1,81 @@
+name: v4 beta build and push
+
+# This workflow is triggered by an update to the upstream-releases file (which is triggered by the check-releases workflow).
+# When triggered the latest version of the container is built and pushed to docker hub
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_and_push:
+    name: v4 beta build and push
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    steps:
+        
+      - name: Get latest version number
+        id: get_version
+        run: |
+          VER=$(curl -s https://raw.githubusercontent.com/hucknz/cumulusmx/master/upstream-releases/cumulusmx-latest.txt)
+          echo "VERSION=$VER" >> $GITHUB_ENV
+
+      - name: Check out the repo
+        id: checkout
+        uses: actions/checkout@v4
+        
+      - name: Set up QEMU
+        id: setup_qemu
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        id: setup_buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        id: authenticate_dockerhub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Log in to ghcr.io
+        id: authenticate_ghcr
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: extract_metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            hucknz/cumulusmx
+            ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=beta-${{ env.VERSION }}
+            type=raw,value=v4-beta
+
+      - name: Build and push Docker images
+        id: build_images
+        uses: docker/build-push-action@v5
+        with:
+          context: beta
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.extract_metadata.outputs.tags }}
+          labels: ${{ steps.extract_metadata.outputs.labels }}
+
+      - name: Notify outcome to Slack
+        id: notify_result
+        uses: act10ns/slack@v2
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          message: CumulusMX v4 beta build and publish containers was a ${{ job.status }}
+        if: always()
