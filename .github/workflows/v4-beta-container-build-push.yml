@@ -65,7 +65,7 @@ jobs:
         id: build_images
         uses: docker/build-push-action@v5
         with:
-          context: beta
+          context: v4-beta
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.extract_metadata.outputs.tags }}
