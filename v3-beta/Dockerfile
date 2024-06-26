@@ -60,4 +60,4 @@ RUN chmod +x MXWeather.sh
 # Expose ports
 EXPOSE 80 8998
 
-CMD ["./MXWeather.sh"]
+ENTRYPOINT ["./MXWeather.sh"]
