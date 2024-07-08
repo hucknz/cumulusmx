@@ -60,6 +60,7 @@ jobs:
           tags: |
             type=raw,value=${{ env.VERSION }}
             type=raw,value=v4
+            type=raw,value=latest
 
       - name: Build and push Docker images
         id: build_images
