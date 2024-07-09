@@ -3,7 +3,7 @@ version: "3.4"
 services:
   cumulusmx:
     container_name: cumulusmx
-    image: ghcr.io/hucknz/cumulusmx:v4
+    image: ghcr.io/hucknz/cumulusmx:latest
     restart: unless-stopped
     environment:
       - PUID=${PUID}
