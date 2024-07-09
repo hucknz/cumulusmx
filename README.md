@@ -5,9 +5,7 @@ Cumulus MX is a cross platform version of the Cumulus weather station software. 
 
 ## Important changes for v4 ##
 
-Because of the breaking changes between v3 and v4 I've added a new tagging format. 
-
-`cumulusmx:v4` will be available for all new releases going forward. This will automatically be updated as new versions are released. **The `cumulusmx:latest` tag will shift to v4 in July.** You can choose to use v4 by changing to that tag earlier if you'd prefer. 
+**The `cumulusmx:latest` tag is now running CumulusMX v4.**
 
 `cumulusmx:v3` will remain available for version 3 builds. These will be updated monthly to avoid the containers going stale or security flaws being left open. 
 
