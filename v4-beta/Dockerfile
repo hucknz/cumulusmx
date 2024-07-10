@@ -13,7 +13,7 @@ SHELL ["/bin/bash", "-c"]
 
 # Install & configure packages
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends nginx curl tzdata unzip libudev-dev git python3-virtualenv expect && \
+    apt-get install -y --no-install-recommends nginx curl tzdata unzip libudev-dev expect && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
