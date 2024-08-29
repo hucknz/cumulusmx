@@ -4,7 +4,7 @@
 # Thanks to https://github.com/Optoisolated/MXWeather
 
 # Pull base image
-FROM ubuntu:24.04
+FROM ubuntu:latest
 LABEL Maintainer="hucknz"
 
 ARG DEBIAN_FRONTEND=noninteractive
