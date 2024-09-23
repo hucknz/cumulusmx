@@ -21,9 +21,6 @@ term_handler() {
     if [ -f "/opt/CumulusMX/config/Cumulus.ini" ]; then
       cp -f /opt/CumulusMX/Cumulus.ini /opt/CumulusMX/config/
     fi
-    if [ -f "/opt/CumulusMX/UniqueId.txt" ]; then
-      cp -f /opt/CumulusMX/UniqueId.txt /opt/CumulusMX/config/
-    fi
   fi
   exit 143; # 128 + 15 -- SIGTERM
 }
