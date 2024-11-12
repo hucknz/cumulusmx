@@ -75,5 +75,6 @@ jobs:
         if: always()
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          noprefix: true
           status: ${{ job.status }}
-          description: ${{ toJson(steps) }}
+          title: ${{ github.workflow}} ${{ job.status }}
