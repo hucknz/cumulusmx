@@ -12,9 +12,6 @@ on:
 jobs:
   get-version:
     runs-on: ubuntu-latest
-    env:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
     steps:
 
       - uses: actions/checkout@v4
@@ -62,17 +59,20 @@ jobs:
       - name: Notify new image found to Slack
         id: notify_new_release
         if: env.MODIFIED == 'true'
-        uses: act10ns/slack@v2
+        uses: sarisia/actions-status-discord@v1
         with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          noprefix: true
           status: ${{ job.status }}
-          steps: ${{ toJson(steps) }}
-          message: "A new CumulusMX version was found. The build and push workflow has been triggered."
+          title: ${{ github.workflow}} ${{ job.status }}
+          description: "A new CumulusMX version was found. The build and push workflow has been triggered."
       
       - name: Notify failure to Slack
         id: notify_failure
         if: failure()
-        uses: act10ns/slack@v2
+        uses: sarisia/actions-status-discord@v1
         with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          noprefix: true
           status: ${{ job.status }}
-          steps: ${{ toJson(steps) }}
-          message: "CumulusMX release check was a ${{ job.status }}"
+          title: "CumulusMX release check ${{ job.status }}"

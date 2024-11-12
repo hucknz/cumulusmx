@@ -9,9 +9,6 @@ on:
 jobs:
   check_image_hash:
     runs-on: ubuntu-latest
-    env:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
     steps:
       - name: Checkout repository
         id: checkout_repository
@@ -65,20 +62,22 @@ jobs:
           git commit -am "New Ubuntu hash found"
           git push
 
-      - name: Notify new image found to Slack
+      - name: Notify new image found
         id: notify_new_image
         if: env.MODIFIED == 'true'
-        uses: act10ns/slack@v2
+        uses: sarisia/actions-status-discord@v1
         with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          noprefix: true
           status: ${{ job.status }}
-          steps: ${{ toJson(steps) }}
-          message: "A new Ubuntu base image was found. The build and push workflow has been triggered."
-  
-      - name: Notify failure to Slack
-        id: notify_failure
+          title: ${{ github.workflow}} ${{ job.status }}
+          description: "A new Ubuntu base image was found. The build and push workflow has been triggered."
+
+      - name: Notify failure
         if: failure()
-        uses: act10ns/slack@v2
+        uses: sarisia/actions-status-discord@v1
         with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          noprefix: true
           status: ${{ job.status }}
-          steps: ${{ toJson(steps) }}
-          message: "Ubuntu base image check was a ${{ job.status }}"
+          title: "Ubuntu base image check ${{ job.status }}"

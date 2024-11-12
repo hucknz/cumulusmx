@@ -14,8 +14,6 @@ jobs:
     permissions:
       packages: write
       contents: read
-    env:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
 
       - name: Check out the repo
@@ -66,11 +64,12 @@ jobs:
           tags: ${{ steps.extract_metadata.outputs.tags }}
           labels: ${{ steps.extract_metadata.outputs.labels }}
 
-      - name: Notify outcome to Slack
-        id: notify_result
-        uses: act10ns/slack@v2
-        with:
-          status: ${{ job.status }}
-          steps: ${{ toJson(steps) }}
-          message: CumulusMX v3 build and publish containers was a ${{ job.status }}
+      - name: Notify outcome
+        id: notify
         if: always()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          noprefix: true
+          status: ${{ job.status }}
+          title: ${{ github.workflow}} ${{ job.status }}
