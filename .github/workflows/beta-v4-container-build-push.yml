@@ -71,9 +71,11 @@ jobs:
           tags: ${{ steps.extract_metadata.outputs.tags }}
           labels: ${{ steps.extract_metadata.outputs.labels }}
 
-      - uses: sarisia/actions-status-discord@v1
-        if: always()
+      - name: Notify outcome to Slack
+        id: notify_result
+        uses: act10ns/slack@v2
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
           status: ${{ job.status }}
-          description: ${{ toJson(steps) }}
+          steps: ${{ toJson(steps) }}
+          message: CumulusMX v4 beta build and publish containers was a ${{ job.status }}
+        if: always()
