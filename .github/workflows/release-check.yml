@@ -31,8 +31,10 @@ jobs:
   
       - name: Compare version numbers
         run: |
-          if [ -n "${{ env.CURRENT_VERSION }}" ]; then
-            if [ "${{ env.CURRENT_VERSION }}" = "${{ env.NEW_VERSION }}" ]; then
+            if [ -z "${{ env.NEW_VERSION }}" ] || [ "${{ env.NEW_VERSION }}" = "null" ]; then
+              echo "No valid new version found. Skipping update."
+              echo "MODIFIED=false" >> $GITHUB_ENV
+            elif [ -n "${{ env.CURRENT_VERSION }}" ] && [ "${{ env.CURRENT_VERSION }}" = "${{ env.NEW_VERSION }}" ]; then
               echo "Releases match. No change detected."
               echo "MODIFIED=false" >> $GITHUB_ENV
             else
@@ -56,7 +58,7 @@ jobs:
           git commit -am "New release version found"
           git push
   
-      - name: Notify new image found to Slack
+      - name: Notify new image found
         id: notify_new_release
         if: env.MODIFIED == 'true'
         uses: sarisia/actions-status-discord@v1
@@ -67,7 +69,7 @@ jobs:
           title: ${{ github.workflow}} ${{ job.status }}
           description: "A new CumulusMX version was found. The build and push workflow has been triggered."
       
-      - name: Notify failure to Slack
+      - name: Notify failure
         id: notify_failure
         if: failure()
         uses: sarisia/actions-status-discord@v1
