@@ -28,7 +28,7 @@ jobs:
           RELEASE_DATA=$(curl -sL "https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest" 2>/dev/null)
           NEW_VERSION=$(echo "$RELEASE_DATA" | jq -r '.tag_name')
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-  
+
       - name: Compare version numbers
         run: |
             if [ -z "${{ env.NEW_VERSION }}" ] || [ "${{ env.NEW_VERSION }}" = "null" ]; then
