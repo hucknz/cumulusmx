@@ -48,7 +48,6 @@ jobs:
               -d '{"ref":"main"}'
               echo "MODIFIED=true" >> $GITHUB_ENV
             fi
-          fi
 
       - name: Commit latest hash
         if: env.MODIFIED == 'true'
