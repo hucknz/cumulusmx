@@ -57,8 +57,8 @@ jobs:
           git commit -am "New release version found"
           git push
   
-      - name: Notify new image found
-        id: notify_new_release
+      - name: Notify new version found
+        id: notify_new_version
         if: env.MODIFIED == 'true'
         uses: sarisia/actions-status-discord@v1
         with:
