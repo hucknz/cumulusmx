@@ -18,7 +18,7 @@ term_handler() {
     kill -SIGTERM "$pid"
     wait "$pid"
     sleep 2
-    if [ -f "/opt/CumulusMX/config/Cumulus.ini" ]; then
+    if [ -f "/opt/CumulusMX/Cumulus.ini" ]; then
       cp -f /opt/CumulusMX/Cumulus.ini /opt/CumulusMX/config/
     fi
     if [ -f "/opt/CumulusMX/UniqueId.txt" ]; then
