@@ -81,6 +81,24 @@ cp -Rn /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
 # Copy Public Web templates
 cp -Rn /tmp/web/* /opt/CumulusMX/web/
 
+# WebSocket Override Setup
+echo "Setting up WebSocket override for HTTPS compatibility..."
+
+# Wait for web files to be ready
+sleep 2
+
+# Find and modify HTML files to include the WebSocket override
+find /opt/CumulusMX/publicweb -name "*.htm" -o -name "*.html" | while read file; do
+    # Check if the script is already included
+    if ! grep -q "websocket-override.js" "$file"; then
+        # Insert the script tag before </head>
+        sed -i 's|</head>|<script src="/js/websocket-override.js"></script>\n</head>|' "$file"
+        echo "Added WebSocket override to: $(basename $file)"
+    fi
+done
+
+echo "WebSocket override setup completed"
+
 # Handle container shutdown
 pid=0
 
