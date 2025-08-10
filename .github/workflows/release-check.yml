@@ -34,7 +34,10 @@ jobs:
       - name: Compare versions
         id: compare_versions
         run: |
-          if [ -n "${{ env.PREVIOUS_VERSION }}" ]; then
+          if [ -z "${{ env.CURRENT_VERSION }}" ] || [ "${{ env.CURRENT_VERSION }}" = "null" ]; then
+            echo "No valid new version found. Skipping update."
+            echo "MODIFIED=false" >> $GITHUB_ENV
+          elif [ -n "${{ env.PREVIOUS_VERSION }}" ]; then
             if [ "${{ env.PREVIOUS_VERSION }}" = "${{ env.CURRENT_VERSION }}" ]; then
               echo "Versions match. No change detected."
               echo "MODIFIED=false" >> $GITHUB_ENV
@@ -42,10 +45,10 @@ jobs:
               echo "Versions differ. There has been a new release."
               sed -i "s/^cumulusmx_version=.*/cumulusmx_version=${{ env.CURRENT_VERSION }}/" .version
               curl -X POST \
-              -H "Accept: application/vnd.github.v3+json" \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              https://api.github.com/repos/hucknz/cumulusmx/actions/workflows/v4-container-build-push.yml/dispatches \
-              -d '{"ref":"main"}'
+                -H "Accept: application/vnd.github.v3+json" \
+                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                https://api.github.com/repos/hucknz/cumulusmx/actions/workflows/v4-container-build-push.yml/dispatches \
+                -d '{"ref":"main"}'
               echo "MODIFIED=true" >> $GITHUB_ENV
             fi
           else
@@ -63,7 +66,7 @@ jobs:
           git push
   
       - name: Notify new version found
-        id: notify_CURRENT_VERSION
+        id: notify_current_version
         if: env.MODIFIED == 'true'
         uses: sarisia/actions-status-discord@v1
         with:
