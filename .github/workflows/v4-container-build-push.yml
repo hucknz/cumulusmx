@@ -20,7 +20,7 @@ jobs:
       - name: Get latest version number
         id: get_version
         run: |
-          VER=$(curl -s https://raw.githubusercontent.com/hucknz/cumulusmx/master/upstream-releases/cumulusmx-latest.txt)
+          VER=$(grep "^cumulusmx_version=" .version | cut -d'=' -f2)
           echo "VERSION=$VER" >> $GITHUB_ENV
 
       - name: Check out the repo
