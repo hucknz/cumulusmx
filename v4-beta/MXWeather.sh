@@ -1,4 +1,18 @@
 #!/bin/bash
+set -e
+
+# Set timezone at container start so runtime TZ env var is honored
+if [ -n "$TZ" ]; then
+  if [ -f "/usr/share/zoneinfo/$TZ" ]; then
+    ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime
+    echo "$TZ" > /etc/timezone
+    echo "Timezone set to $TZ"
+  else
+    echo "Warning: timezone '/usr/share/zoneinfo/$TZ' not found. Leaving default timezone (ECT/UTC)."
+  fi
+else
+  echo "TZ not set; using default timezone from image: ${TZ:-ETC/UTC}"
+fi
 
 # Migrate v3 to v4 functionality
 
