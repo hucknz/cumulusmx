@@ -41,9 +41,9 @@ RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 # Set default locale environment variables (can be overridden at runtime)
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US:en
-ENV LC_ALL=en_US.UTF-8
+ENV LANG=en_GB.UTF-8
+ENV LANGUAGE=en_GB:en
+ENV LC_ALL=en_GB.UTF-8
 
 # Use CACHEBUST to ensure latest CumulusMX is downloaded
 ARG CACHEBUST=1
