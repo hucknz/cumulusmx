@@ -91,10 +91,10 @@ fi
 service nginx start
 
 # Copy Web Support files
-cp -Rn /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
+cp -Rn /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/ || true
 
 # Copy Public Web templates
-cp -Rn /tmp/web/* /opt/CumulusMX/web/
+cp -Rn /tmp/web/* /opt/CumulusMX/web/ || true
 
 # Handle container shutdown
 pid=0
@@ -129,55 +129,25 @@ dotnet /opt/CumulusMX/CumulusMX.dll >> /var/log/nginx/CumulusMX.log &
 pid="$!"
 echo "Starting CumulusMX..."
 
-# Get the latest log file
-get_latest_logfile() {
-  # New filename format example: MxDiags-251016-211539.log
-  # Pattern: prefix "MxDiags-" then YYMMDD-HHMMSS followed by .log
-  # Use case-insensitive match to be tolerant of capitalization
-  ls -1 /opt/CumulusMX/MXdiags 2>/dev/null | grep -i -E '^MxDiags-[0-9]{6}-[0-9]{6}\.log$' | sort | tail -n 1 || true
-}
+# Tail the single static log file
+LOGFILE="/opt/CumulusMX/MXdiags/MxDiags.log"
 
-# Initialize the latest log file variable
-latest_logfile=""
+# If logfile doesn't exist yet, wait (up to a timeout) for it to appear to avoid failing the container
+WAIT_SECONDS=30
+count=0
+while [ ! -f "$LOGFILE" ] && [ $count -lt $WAIT_SECONDS ]; do
+  echo "Waiting for log file $LOGFILE to appear..."
+  sleep 1
+  count=$((count + 1))
+done
 
-# Continuously check for new log files and tail the latest one
-(
-  while true; do
-    current_logfile=$(get_latest_logfile)
-    
-    # If the latest log file has changed, update and tail the new log file
-    if [ "$current_logfile" != "$latest_logfile" ]; then
-      latest_logfile=$current_logfile
-      if [ -n "$latest_logfile" ]; then
-        fullpath="/opt/CumulusMX/MXdiags/$latest_logfile"
-        
-        echo "Loading log file: $latest_logfile"
-        
-        # Kill the previous tail process if it exists
-        if [ -n "$tail_pid" ]; then
-          kill "$tail_pid" 2>/dev/null || true
-        fi
-        
-        # Tail the new log file in the background
-        tail -n +1 -f "$fullpath" &
-        
-        # Get the PID of the tail process
-        tail_pid=$!
-      else
-        # No logfile found; ensure previous tail is killed
-        if [ -n "$tail_pid" ]; then
-          kill "$tail_pid" 2>/dev/null || true
-          tail_pid=""
-        fi
-      fi
-    fi
-    
-    # Sleep for a short period before checking again
-    sleep 30
-  done
-) &
+# Tail the log file in background so container stays alive and logs are visible via docker logs
+tail -n +1 -f "$LOGFILE" &
+
+# Save tail PID so we can kill it on shutdown if needed
+tail_pid=$!
 
 # Wait forever to capture container shutdown command
 while true; do
-  tail -f /dev/null & wait ${!}
+  wait ${!}
 done
