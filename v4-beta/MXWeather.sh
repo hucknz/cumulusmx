@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 
 # Set timezone at container start so runtime TZ env var is honored
@@ -19,18 +18,18 @@ fi
 
 # Enables migration if the environment variable is set
 if [ "$MIGRATE" != "false" ]; then
-echo "Migration enabled. Begin migration checks..."
+  echo "Migration enabled. Begin migration checks..."
 
   # Checks if there is more than 1 file in the data folder (indicates new install or existing)
-  if [ "$(ls -A /opt/CumulusMX/data/ | wc -l)" -gt 1 ]|| [ "$MIGRATE" == "force" ]; then 
-  echo "Multiple files detected. Checking if migration has already been completed..."
+  if [ "$(ls -A /opt/CumulusMX/data/ | wc -l)" -gt 1 ] || [ "$MIGRATE" == "force" ]; then 
+    echo "Multiple files detected. Checking if migration has already been completed..."
 
     # Checks to see if data has already been migrated and skips migration if it has. 
     if [ ! -f "/opt/CumulusMX/config/.migrated" ] && [ ! -f "/opt/CumulusMX/config/.nodata" ] || [ "$MIGRATE" == "force" ]; then 
       if [ "$MIGRATE" == "force" ]; then
         echo "Migration is being forced. Backing up files..."
       else 
-       echo "No previous migration detected. Backing up files..."
+        echo "No previous migration detected. Backing up files..."
       fi
 
       # Backup Cumulus.ini file
@@ -66,7 +65,6 @@ EOF
       touch /opt/CumulusMX/config/.migrated
 
       # Copy UniqueID file to config folder if it exists
-
       if [ -f "/opt/CumulusMX/UniqueId.txt" ]; then
         cp -f /opt/CumulusMX/UniqueId.txt /opt/CumulusMX/config/
       fi
@@ -90,87 +88,68 @@ fi
 # Start NGINX web server
 service nginx start
 
-# Copy Web Support files
-cp -Rn /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/
+# Copy Web Support files (ignore errors if none)
+cp -Rn /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/ || true
 
-# Copy Public Web templates
-cp -Rn /tmp/web/* /opt/CumulusMX/web/
+# Copy Public Web templates (ignore errors if none)
+cp -Rn /tmp/web/* /opt/CumulusMX/web/ || true
 
-# Handle container shutdown
-pid=0
-
-# SIGTERM handler copies files to config folder when container stops
+# SIGTERM handler copies files to config folder when container stops and kills child processes
 term_handler() {
-  if [ $pid -ne 0 ]; then
-    kill -SIGTERM "$pid"
-    wait "$pid"
-    sleep 2
-    if [ -f "/opt/CumulusMX/Cumulus.ini" ]; then
-      cp -f /opt/CumulusMX/Cumulus.ini /opt/CumulusMX/config/
-    fi
-    if [ -f "/opt/CumulusMX/UniqueId.txt" ]; then
-      cp -f /opt/CumulusMX/UniqueId.txt /opt/CumulusMX/config/
-    fi
+  echo "Received SIGTERM, shutting down..."
+  # kill dotnet (if running)
+  if [ -n "$dotnet_pid" ]; then
+    kill -SIGTERM "$dotnet_pid" 2>/dev/null || true
+    wait "$dotnet_pid" 2>/dev/null || true
   fi
+  # kill tail (if running)
+  if [ -n "$tail_pid" ]; then
+    kill -SIGTERM "$tail_pid" 2>/dev/null || true
+    wait "$tail_pid" 2>/dev/null || true
+  fi
+
+  sleep 1
+  # Persist files if present
+  if [ -f "/opt/CumulusMX/Cumulus.ini" ]; then
+    cp -f /opt/CumulusMX/Cumulus.ini /opt/CumulusMX/config/
+  fi
+  if [ -f "/opt/CumulusMX/UniqueId.txt" ]; then
+    cp -f /opt/CumulusMX/UniqueId.txt /opt/CumulusMX/config/
+  fi
+
   exit 143; # 128 + 15 -- SIGTERM
 }
 
-# Setup handlers
-trap 'kill ${!}; term_handler' SIGTERM
+# Setup trap for SIGTERM
+trap 'term_handler' SIGTERM
 
-# Run application
+# Run application (move Cumulus files back if present)
 if [ -f "/opt/CumulusMX/config/UniqueId.txt" ]; then
   cp -f /opt/CumulusMX/config/UniqueId.txt /opt/CumulusMX/
 fi
 if [ -f "/opt/CumulusMX/config/Cumulus.ini" ]; then
   cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/
 fi
-dotnet /opt/CumulusMX/CumulusMX.dll >> /var/log/nginx/CumulusMX.log &
-pid="$!"
-echo "Starting CumulusMX..."
 
-# Get the latest log file
-get_latest_logfile() {
-  # New filename format example: MxDiags-251016-211539.log
-  # Pattern: prefix "MxDiags-" then YYMMDD-HHMMSS followed by .log
-  # Use case-insensitive match to be tolerant of capitalization
-  ls -1 /opt/CumulusMX/MXdiags 2>/dev/null | grep -i -E '^MxDiags-[0-9]{6}-[0-9]{6}\.log$' | sort | tail -n 1 || true
-}
+# Start CumulusMX in background and remember its PID
+dotnet /opt/CumulusMX/CumulusMX.dll >> /var/log/nginx/CumulusMX.log 2>&1 &
+dotnet_pid="$!"
+echo "Started CumulusMX with PID $dotnet_pid"
 
-# Initialize the latest log file variable
-latest_logfile=""
+# Tail the single static log file using tail -F and make it the foreground process so Docker captures continuous output.
+# Using exec replaces the shell with tail so the container's main process is tail and docker logs will stream live output
+LOGFILE="/opt/CumulusMX/MXdiags/MxDiags.log"
 
-# Continuously check for new log files and tail the latest one, but do not create the file.
-LOGFILE="MxDiags.log"
-tail_pid=""
+# Start tail -F as foreground; tail -F will wait for the file to appear and will follow rotations/recreations.
+# We capture its PID only for the shutdown handler (when exec is used PID tracking isn't needed, but we keep guard)
+tail -n +1 -F "$LOGFILE" &
+tail_pid=$!
 
-(
-  while true; do
-    fullpath="/opt/CumulusMX/MXdiags/$LOGFILE"
+# Wait for dotnet to exit; keep the container running until dotnet stops.
+# When dotnet exits, allow short delay for logs to flush, then exit (which will terminate tail via SIGTERM trap).
+wait "$dotnet_pid"
+echo "CumulusMX process exited; allowing 1s for logs to flush."
+sleep 1
 
-    if [ -f "$fullpath" ]; then
-      # If we already tailing the same file, do nothing
-      if [ -z "$tail_pid" ] || ! kill -0 "$tail_pid" 2>/dev/null; then
-        echo "Loading log file: $fullpath"
-        tail -n +1 -f "$fullpath" &
-        tail_pid=$!
-      fi
-    else
-      # File not present — stop any existing tail and wait for it to appear
-      if [ -n "$tail_pid" ]; then
-        kill "$tail_pid" 2>/dev/null || true
-        tail_pid=""
-      fi
-      # Wait a short time before re-checking
-      sleep 2
-    fi
-
-    # Sleep a bit before checking again (reduce frequency to avoid busy-loop)
-    sleep 30
-  done
-) &
-
-# Wait forever to capture container shutdown command
-while true; do
-  tail -f /dev/null & wait ${!}
-done
+# If dotnet has exited we should exit the script which will trigger TERM handler and stop tail
+exit 0
