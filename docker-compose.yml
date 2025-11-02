@@ -1,27 +1,24 @@
-version: "3.4"
-
-services:
   cumulusmx:
     container_name: cumulusmx
-    image: ghcr.io/hucknz/cumulusmx:latest
-    restart: unless-stopped
+    image: ghcr.io/hucknz/cumulusmx:v4
     environment:
-      - TZ="Etc/UTC"
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - LANG=${LANG} # Optional. If not set will try to infer from Timezone or fallback to en_GB. 
       - MIGRATE=false # Optional for v4 only. Can be removed as migration will run automatically. If you don't want to migrate set to false or use force to force a migration to run.  
       - MIGRATE_CUSTOM_LOG_FILES="File1 File2 File3" # Optional for v4 only. Add any Custom Daily log files filenames you'd like migrated. Remove if not required. 
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /cumulusmx/data:/opt/CumulusMX/data
-      - /cumulusmx/backup:/opt/CumulusMX/backup
-      - /cumulusmx/log:/var/log/nginx
-      - /cumulusmx/MXdiags:/opt/CumulusMX/MXdiags
-      - /cumulusmx/config:/opt/CumulusMX/config
-      - /cumulusmx/publicweb:/opt/CumulusMX/publicweb
-      - /cumulusmx/templates:/opt/CumulusMX/web
-      - /cumulusmx/reports:/opt/CumulusMX/Reports
+      - ${DOCKERCONFDIR}/cumulusmx/data:/opt/CumulusMX/data
+      - ${DOCKERCONFDIR}/cumulusmx/backup:/opt/CumulusMX/backup
+      - ${DOCKERCONFDIR}/cumulusmx/log:/var/log/nginx
+      - ${DOCKERCONFDIR}/cumulusmx/MXdiags:/opt/CumulusMX/MXdiags
+      - ${DOCKERCONFDIR}/cumulusmx/config:/opt/CumulusMX/config
+      - ${DOCKERCONFDIR}/cumulusmx/publicweb:/opt/CumulusMX/publicweb
+      - ${DOCKERCONFDIR}/cumulusmx/templates:/opt/CumulusMX/web
+      - ${DOCKERCONFDIR}/cumulusmx/reports:/opt/CumulusMX/Reports
     ports:
-      - 8998:8998
-      - 8009:80
-# Remove this comment if using a USB weather station, remove this comment and the lines below if not using a USB weatherstation
-    devices:
-      - /dev/hidraw0:/dev/hidraw0
+      - '8998:8998'
+      - '8009:80'
+    restart: unless-stopped
