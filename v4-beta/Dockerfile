@@ -2,6 +2,11 @@
 # Cumulus MX Dockerfile
 #
 # Thanks to https://github.com/Optoisolated/MXWeather
+# Updated to provide full locales support and runtime-configurable TZ/locale.
+# - installs locales-all and libicu so many locales are available at runtime
+# - does not hardcode timezone files at build-time (honors runtime TZ)
+# - sets sensible defaults for LANG/LC_ALL but allows docker run -e overrides
+#
 
 # Pull base image
 FROM mcr.microsoft.com/dotnet/runtime:8.0
@@ -11,13 +16,34 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=ETC/UTC
 SHELL ["/bin/bash", "-c"]
 
-# Install & configure packages
+# Install required packages and globalisation support
+# - locales-all provides prebuilt locale data for a broad set of locales (convenient; increases image size)
+# - libicu ensures .NET Core can use ICU for globalization
+# - tzdata is installed so timezone data exists (we'll apply TZ at container start)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends nginx curl tzdata unzip libudev-dev expect && \
+    apt-get install -y --no-install-recommends \
+      nginx \
+      curl \
+      tzdata \
+      unzip \
+      libudev-dev \
+      expect \
+      locales-all \
+      libicu-dev && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Configure NGINX (do not set timezone at build - set at runtime in entry script)
+RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
     chown -R www-data:www-data /var/lib/nginx
+
+# Ensure .NET uses system globalization data (not invariant)
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+# Set default locale environment variables (can be overridden at runtime)
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 # Use CACHEBUST to ensure latest CumulusMX is downloaded
 ARG CACHEBUST=1
@@ -40,7 +66,7 @@ COPY ./nginx.conf /etc/nginx/
 COPY ./MXWeather.conf /etc/nginx/sites-available/
 
 RUN ln -s /etc/nginx/sites-available/MXWeather.conf /etc/nginx/sites-enabled/MXWeather.conf && \
-    rm /etc/nginx/sites-enabled/default && \
+    rm -f /etc/nginx/sites-enabled/default && \
     chmod +x /opt/CumulusMX/MXWeather.sh
 
 WORKDIR /opt/CumulusMX/
