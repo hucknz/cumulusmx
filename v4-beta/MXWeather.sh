@@ -1,4 +1,5 @@
 #!/bin/bash
+
 set -e
 
 # Set timezone at container start so runtime TZ env var is honored
@@ -8,7 +9,7 @@ if [ -n "$TZ" ]; then
     echo "$TZ" > /etc/timezone
     echo "Timezone set to $TZ"
   else
-    echo "Warning: timezone '/usr/share/zoneinfo/$TZ' not found. Leaving default timezone (ECT/UTC)."
+    echo "Warning: timezone '/usr/share/zoneinfo/$TZ' not found. Leaving default timezone (${TZ:-ETC/UTC})."
   fi
 else
   echo "TZ not set; using default timezone from image: ${TZ:-ETC/UTC}"
@@ -130,7 +131,10 @@ echo "Starting CumulusMX..."
 
 # Get the latest log file
 get_latest_logfile() {
-  ls -1 /opt/CumulusMX/MXdiags | grep -E '^[0-9]{8}-[0-9]{6}\.txt$' | sort | tail -n 1
+  # New filename format example: MxDiags-251016-211539.log
+  # Pattern: prefix "MxDiags-" then YYMMDD-HHMMSS followed by .log
+  # Use case-insensitive match to be tolerant of capitalization
+  ls -1 /opt/CumulusMX/MXdiags 2>/dev/null | grep -i -E '^MxDiags-[0-9]{6}-[0-9]{6}\.log$' | sort | tail -n 1 || true
 }
 
 # Initialize the latest log file variable
@@ -144,20 +148,28 @@ latest_logfile=""
     # If the latest log file has changed, update and tail the new log file
     if [ "$current_logfile" != "$latest_logfile" ]; then
       latest_logfile=$current_logfile
-      fullpath="/opt/CumulusMX/MXdiags/$latest_logfile"
-      
-      echo "Loading log file: $latest_logfile"
-      
-      # Kill the previous tail process if it exists
-      if [ -n "$tail_pid" ]; then
-        kill "$tail_pid"
+      if [ -n "$latest_logfile" ]; then
+        fullpath="/opt/CumulusMX/MXdiags/$latest_logfile"
+        
+        echo "Loading log file: $latest_logfile"
+        
+        # Kill the previous tail process if it exists
+        if [ -n "$tail_pid" ]; then
+          kill "$tail_pid" 2>/dev/null || true
+        fi
+        
+        # Tail the new log file in the background
+        tail -n +1 -f "$fullpath" &
+        
+        # Get the PID of the tail process
+        tail_pid=$!
+      else
+        # No logfile found; ensure previous tail is killed
+        if [ -n "$tail_pid" ]; then
+          kill "$tail_pid" 2>/dev/null || true
+          tail_pid=""
+        fi
       fi
-      
-      # Tail the new log file in the background
-      tail -n +1 -f "$fullpath" &
-      
-      # Get the PID of the tail process
-      tail_pid=$!
     fi
     
     # Sleep for a short period before checking again
