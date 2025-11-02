@@ -14,16 +14,16 @@ jobs:
       packages: write
       contents: read
     steps:
-      
+
+      - name: Check out the repo
+        id: checkout_repository
+        uses: actions/checkout@v4
+
       - name: Get latest version number
         id: get_version
         run: |
           VER=$(grep "^cumulusmx_version=" .version | cut -d'=' -f2)
           echo "VERSION=$VER" >> $GITHUB_ENV
-
-      - name: Check out the repo
-        id: checkout_repository
-        uses: actions/checkout@v4
         
       - name: Set up QEMU
         id: setup_qemu
