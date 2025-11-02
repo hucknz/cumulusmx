@@ -17,9 +17,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
-    chown -R www-data:www-data /var/lib/nginx && \
-    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
-    echo $TZ > /etc/timezone
+    chown -R www-data:www-data /var/lib/nginx
 
 # Use CACHEBUST to ensure latest CumulusMX is downloaded
 ARG CACHEBUST=1
