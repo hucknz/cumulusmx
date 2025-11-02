@@ -6,21 +6,19 @@ services:
     image: ghcr.io/hucknz/cumulusmx:latest
     restart: unless-stopped
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+      - TZ="Etc/UTC"
       - MIGRATE=false # Optional for v4 only. Can be removed as migration will run automatically. If you don't want to migrate set to false or use force to force a migration to run.  
       - MIGRATE_CUSTOM_LOG_FILES="File1 File2 File3" # Optional for v4 only. Add any Custom Daily log files filenames you'd like migrated. Remove if not required. 
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${DOCKERCONFDIR}/cumulusmx/data:/opt/CumulusMX/data
-      - ${DOCKERCONFDIR}/cumulusmx/backup:/opt/CumulusMX/backup
-      - ${DOCKERCONFDIR}/cumulusmx/log:/var/log/nginx
-      - ${DOCKERCONFDIR}/cumulusmx/MXdiags:/opt/CumulusMX/MXdiags
-      - ${DOCKERCONFDIR}/cumulusmx/config:/opt/CumulusMX/config
-      - ${DOCKERCONFDIR}/cumulusmx/publicweb:/opt/CumulusMX/publicweb
-      - ${DOCKERCONFDIR}/cumulusmx/templates:/opt/CumulusMX/web
-      - ${DOCKERCONFDIR}/cumulusmx/reports:/opt/CumulusMX/Reports
+      - /cumulusmx/data:/opt/CumulusMX/data
+      - /cumulusmx/backup:/opt/CumulusMX/backup
+      - /cumulusmx/log:/var/log/nginx
+      - /cumulusmx/MXdiags:/opt/CumulusMX/MXdiags
+      - /cumulusmx/config:/opt/CumulusMX/config
+      - /cumulusmx/publicweb:/opt/CumulusMX/publicweb
+      - /cumulusmx/templates:/opt/CumulusMX/web
+      - /cumulusmx/reports:/opt/CumulusMX/Reports
     ports:
       - 8998:8998
       - 8009:80
