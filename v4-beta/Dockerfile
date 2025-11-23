@@ -49,7 +49,7 @@ ENV LC_ALL=en_GB.UTF-8
 ARG CACHEBUST=1
 
 # Download & install CumulusMX
-RUN curl -L $(curl -s https://github.com/cumulusmx/CumulusMX/releases/download/b4128/CumulusMXDist4128.zip) --output /tmp/CumulusMX.zip && \
+RUN curl -L https://github.com/cumulusmx/CumulusMX/releases/download/b4128/CumulusMXDist4128.zip --output /tmp/CumulusMX.zip && \
     mkdir -p /opt/CumulusMX/publicweb /tmp/web && \
     unzip /tmp/CumulusMX.zip -d /opt/ && \
     chmod +x /opt/CumulusMX/CumulusMX.exe && \
