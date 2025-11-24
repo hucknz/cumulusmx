@@ -9,7 +9,7 @@
 #
 
 # Pull base image
-FROM mcr.microsoft.com/dotnet/runtime:10.0
+FROM mcr.microsoft.com/dotnet/runtime:8.0
 LABEL Maintainer="hucknz"
 
 ARG DEBIAN_FRONTEND=noninteractive
