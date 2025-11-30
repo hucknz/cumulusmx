@@ -13,7 +13,9 @@ FROM mcr.microsoft.com/dotnet/runtime:8.0
 LABEL Maintainer="hucknz"
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG PORT=8998
 ENV TZ=ETC/UTC
+ENV PORT=${PORT}
 SHELL ["/bin/bash", "-c"]
 
 # Install required packages and globalisation support
@@ -34,7 +36,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Configure NGINX (do not set timezone at build - set at runtime in entry script)
-RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
+RUN echo -e "\ndaemon off;" >> /etc/nginx/nginx.conf && \
     chown -R www-data:www-data /var/lib/nginx
 
 # Ensure .NET uses system globalization data (not invariant)
@@ -52,7 +54,7 @@ ARG CACHEBUST=1
 RUN curl -L $(curl -s https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest | grep browser_ | cut -d\" -f4) --output /tmp/CumulusMX.zip && \
     mkdir -p /opt/CumulusMX/publicweb /tmp/web && \
     unzip /tmp/CumulusMX.zip -d /opt/ && \
-    chmod +x /opt/CumulusMX/CumulusMX.exe && \
+    chmod +x /opt/CumulusMX/CumulusMX.exe || true && \
     cp -R /opt/CumulusMX/web/* /tmp/web/ && \
     cp -r /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/ && \
     rm /tmp/CumulusMX.zip
@@ -71,6 +73,8 @@ RUN ln -s /etc/nginx/sites-available/MXWeather.conf /etc/nginx/sites-enabled/MXW
 
 WORKDIR /opt/CumulusMX/
 
-EXPOSE 80 8998
+# Expose the web port and the (default) runtime port
+# Note: EXPOSE is informational at build time; you can still map any host port at runtime.
+EXPOSE 80 ${PORT}
 
 ENTRYPOINT ["./MXWeather.sh"]

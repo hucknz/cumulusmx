@@ -166,7 +166,7 @@ cp -Rn /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/ 2>/dev/null || true
 # Copy Public Web templates
 cp -Rn /tmp/web/* /opt/CumulusMX/web/ 2>/dev/null || true
 
-# --- PORT handling: allow overriding internal CumulusMX port via env var PORT (default 8998) ---
+# Support specifying CumulusMX port. Defaults to 8998. 
 : "${PORT:=8998}"
 export PORT
 echo "Using internal CumulusMX port: ${PORT}"
