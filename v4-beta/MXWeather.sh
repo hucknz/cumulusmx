@@ -105,7 +105,7 @@ else
   echo "LANG is already set to '$LANG' — skipping derivation from TZ."
 fi
 
-# --- Migration logic (unchanged except minor robustness) ---
+# --- Migration logic (unchanged) ---
 if [ "$MIGRATE" != "false" ]; then
   echo "Migration enabled. Begin migration checks..."
   if [ "$(ls -A /opt/CumulusMX/data/ 2>/dev/null | wc -l)" -gt 1 ] || [ "$MIGRATE" == "force" ]; then
@@ -157,6 +157,9 @@ else
   echo "Migration is disabled... Skipping migration."
 fi
 
+# Start NGINX web server (no nginx config changes performed here)
+service nginx start
+
 # Copy Web Support files (ignore errors if none)
 cp -Rn /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/ 2>/dev/null || true
 
@@ -167,25 +170,6 @@ cp -Rn /tmp/web/* /opt/CumulusMX/web/ 2>/dev/null || true
 : "${PORT:=8998}"
 export PORT
 echo "Using internal CumulusMX port: ${PORT}"
-
-# Patch nginx vhost so /ws and /api proxy to the selected internal port
-NGINX_SITE="/etc/nginx/sites-available/MXWeather.conf"
-if [ -f "${NGINX_SITE}" ]; then
-  # Replace common variants of the default internal target with the selected port
-  sed -i "s@127\\.0\\.0\\.1:8998@127.0.0.1:${PORT}@g" "${NGINX_SITE}" || true
-  sed -i "s@localhost:8998@127.0.0.1:${PORT}@g" "${NGINX_SITE}" || true
-  sed -i "s@http://127\\.0\\.0\\.1:8998@http://127.0.0.1:${PORT}@g" "${NGINX_SITE}" || true
-  sed -i "s@http://localhost:8998@http://127.0.0.1:${PORT}@g" "${NGINX_SITE}" || true
-
-  # ensure enabled
-  ln -sf "${NGINX_SITE}" /etc/nginx/sites-enabled/MXWeather.conf || true
-  echo "Patched nginx vhost to proxy to 127.0.0.1:${PORT} (if file existed)"
-else
-  echo "No nginx site file at ${NGINX_SITE}; skipping nginx patch"
-fi
-
-# Start NGINX web server
-service nginx start
 
 # --- Signal handling and process management ---
 dotnet_pid=""
