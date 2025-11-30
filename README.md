@@ -19,7 +19,7 @@ You can see the migration logic [below](#migration). There is more detail regard
 
 ## Usage
 1. Ensure Docker is installed and configured on the host machine (I recommend using DockSTARTer if you want an easy way to get started with Docker)
-2. Clone the docker-compose.yml and .env files to your local machine
+2. Clone the [docker-compose.yml](https://github.com/hucknz/cumulusmx/blob/main/docker-compose.yml) and [.env](https://github.com/hucknz/cumulusmx/blob/main/.env) files to your local machine
 3. Modify the .env file to suit your environment
 4. Important: If you're not using USB passthrough make sure to remove the "devices" section from the docker-compose.yml file (see Known Issues)
 5. Run `docker compose up` to start the container
