@@ -261,25 +261,25 @@ export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=${DOTNET_SYSTEM_GLOBALIZATION_INVAR
 
 # --- End runtime locale handling ---
 
-# --- Migration logic  ---
+# --- Migration logic
 if [ "$MIGRATE" != "false" ]; then
-  echo "Migration enabled.  Begin migration checks..."
+  echo "Migration enabled. Begin migration checks..."
   if [ "$(ls -A /opt/CumulusMX/data/ 2>/dev/null | wc -l)" -gt 1 ] || [ "$MIGRATE" == "force" ]; then
-    echo "Multiple files detected.  Checking if migration has already been completed..."
-    if { [ !  -f "/opt/CumulusMX/config/. migrated" ] && [ ! -f "/opt/CumulusMX/config/. nodata" ]; } || [ "$MIGRATE" == "force" ]; then
+    echo "Multiple files detected. Checking if migration has already been completed..."
+    if { [ ! -f "/opt/CumulusMX/config/.migrated" ] && [ ! -f "/opt/CumulusMX/config/.nodata" ]; } || [ "$MIGRATE" == "force" ]; then
       if [ "$MIGRATE" == "force" ]; then
         echo "Migration is being forced. Backing up files..."
       else
         echo "No previous migration detected. Backing up files..."
       fi
       if [ -f /opt/CumulusMX/config/Cumulus.ini ]; then
-        cp -R /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/config/Cumulus-v3.ini. bak
-        echo "Backed up Cumulus. ini"
+        cp -R /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/config/Cumulus-v3.ini.bak
+        echo "Backed up Cumulus.ini"
       fi
       mkdir -p /opt/CumulusMX/backup/datav3
       cp -R /opt/CumulusMX/data/* /opt/CumulusMX/backup/datav3 || true
       echo "Backed up data folder"
-      if [ -f "/opt/CumulusMX/config/Cumulus. ini" ]; then
+      if [ -f "/opt/CumulusMX/config/Cumulus.ini" ]; then
         cp -f /opt/CumulusMX/config/Cumulus.ini /opt/CumulusMX/
         echo "Copied Cumulus.ini file to root"
       fi
@@ -300,17 +300,17 @@ EOF
       if [ -f "/opt/CumulusMX/UniqueId.txt" ]; then
         cp -f /opt/CumulusMX/UniqueId.txt /opt/CumulusMX/config/
       fi
-      echo "Migration completed.  Starting CumulusMX..."
+      echo "Migration completed. Starting CumulusMX..."
     else
-      echo "Migration has already been done...  Skipping migration."
+      echo "Migration has already been done... Skipping migration."
     fi
   else
     mkdir -p /opt/CumulusMX/config
     touch /opt/CumulusMX/config/.nodata
-    echo "No data detected...  Skipping migration."
+    echo "No data detected... Skipping migration."
   fi
 else
-  echo "Migration is disabled...  Skipping migration."
+  echo "Migration is disabled... Skipping migration."
 fi
 
 # Start NGINX web server
@@ -322,7 +322,7 @@ cp -Rn /opt/CumulusMX/webfiles/* /opt/CumulusMX/publicweb/ 2>/dev/null || true
 # Copy Public Web templates
 cp -Rn /tmp/web/* /opt/CumulusMX/web/ 2>/dev/null || true
 
-# Support specifying CumulusMX port.  Defaults to 8998.  
+# Support specifying CumulusMX port. Defaults to 8998. 
 : "${PORT:=8998}"
 export PORT
 echo "Using internal CumulusMX port: ${PORT}"
@@ -368,9 +368,9 @@ echo "Starting CumulusMX (PID $dotnet_pid) on port ${PORT}..."
 # Tail the MXDiags log
 LOGFILE="/opt/CumulusMX/MXdiags/MxDiags.log"
 tail -n +1 -F "$LOGFILE" &
-tail_pid=$! 
+tail_pid=$!
 
-# Wait for dotnet to exit; when it does, allow brief time for logs and then exit to let the container stop. 
+# Wait for dotnet to exit; when it does, allow brief time for logs and then exit to let the container stop.
 wait "$dotnet_pid"
 echo "CumulusMX process exited; allowing 1s for logs to flush."
 sleep 1
