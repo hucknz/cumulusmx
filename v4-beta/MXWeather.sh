@@ -21,13 +21,13 @@ fi
 # Helper: find the actual locale string from locale -a (exact match required!)
 _find_available_locale() {
   local want="$1"
-  local base="${want%%.*}"  # e.g., en_NZ from en_NZ.UTF-8 or en_NZ.utf8
+  local base="${want%%.*}"
   
-  # locale -a output is case-sensitive and uses lowercase 'utf8'
   # Try common patterns in order of preference
+  local match
   
   # 1. Try exact match (case-sensitive)
-  local match=$(locale -a 2>/dev/null | grep -x "$want" | head -n1)
+  match=$(locale -a 2>/dev/null | grep -x "$want" | head -n1)
   if [ -n "$match" ]; then
     echo "$match"
     return 0
@@ -99,7 +99,7 @@ desired_base=""
 
 if [ -n "$LANG" ] && [ "$LANG" != "C. UTF-8" ] && [ "$LANG" != "C" ]; then
   # User provided LANG - extract base
-  desired_base="${LANG%%.*}"  # Remove . UTF-8 or .utf8 or other charset
+  desired_base="${LANG%%.*}"
   echo "User-supplied LANG base: $desired_base"
 else
   # Derive from TZ
@@ -115,24 +115,24 @@ else
   fi
 fi
 
-# Find the actual available locale string (tries . utf8, .UTF-8, and bare formats)
-actual_locale=$(_find_available_locale "$desired_base. utf8")
+# Find the actual available locale string
+actual_locale=$(_find_available_locale "${desired_base}. utf8")
 if [ -z "$actual_locale" ]; then
-  actual_locale=$(_find_available_locale "$desired_base. UTF-8")
+  actual_locale=$(_find_available_locale "${desired_base}. UTF-8")
 fi
 if [ -z "$actual_locale" ]; then
   actual_locale=$(_find_available_locale "$desired_base")
 fi
 
 if [ -z "$actual_locale" ]; then
-  echo "⚠ WARNING: Could not find locale for '$desired_base' in system"
+  echo "WARNING: Could not find locale for '$desired_base' in system"
   echo "Available locales matching '${desired_base}':"
   locale -a 2>/dev/null | grep -i "$desired_base" || echo "(none found)"
   echo ""
   echo "Falling back to C.UTF-8"
-  actual_locale="C. UTF-8"
+  actual_locale="C.UTF-8"
 else
-  echo "✓ Found available locale: $actual_locale"
+  echo "Found available locale: $actual_locale"
 fi
 
 # Export ALL locale variables with the exact string from locale -a
@@ -164,8 +164,8 @@ LANGUAGE="$LANGUAGE"
 EOF
 
 # Update /etc/environment for system-wide persistence
-cat > /tmp/envfile. tmp <<EOF
-$(grep -v "^LANG=\|^LC_\|^LANGUAGE=" /etc/environment 2>/dev/null || true)
+grep -v "^LANG=\|^LC_\|^LANGUAGE=" /etc/environment 2>/dev/null > /tmp/envfile.tmp || touch /tmp/envfile.tmp
+cat >> /tmp/envfile.tmp <<EOF
 LANG="$LANG"
 LC_ALL="$LC_ALL"
 LC_CTYPE="$LC_CTYPE"
