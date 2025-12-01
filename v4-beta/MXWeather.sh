@@ -77,15 +77,15 @@ _find_locale_match() {
   local want="$1"
   local want_lower
   want_lower=$(echo "$want" | tr '[:upper:]' '[:lower:]' | sed 's/\.utf-8//')
-  # Prefer exact match first
-  match="$(locale -a 2>/dev/null | tr '[:upper:]' '[:lower:]' | grep -E \"^${want_lower}(\.|$)\" | head -n1 || true)"
+    # Prefer exact match first
+  match="$(locale -a 2>/dev/null | tr '[:upper:]' '[:lower:]' | grep -E "^${want_lower}(\.|$)" | head -n1 || true)"
   if [ -n "$match" ]; then
     # Return in original case as in locale -a (we'll re-use the exact entry)
     locale -a 2>/dev/null | grep -i "^$match$" | head -n1
     return 0
   fi
   # Fallback: grep contains
-  match="$(locale -a 2>/dev/null | tr '[:upper:]' '[:lower:]' | grep -i \"$want_lower\" | head -n1 || true)"
+  match="$(locale -a 2>/dev/null | tr '[:upper:]' '[:lower:]' | grep -i "$want_lower" | head -n1 || true)"
   if [ -n "$match" ]; then
     locale -a 2>/dev/null | grep -i "$match" | head -n1
     return 0
