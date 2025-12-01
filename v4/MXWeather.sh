@@ -1,111 +1,182 @@
 #!/bin/bash
 set -e
 
-# MXWeather.sh - container entrypoint for CumulusMX
-# - Applies runtime TZ if provided
-# - Derives a sensible LANG/LC_* from TZ when LANG is not provided by the user
-# - Exports locale env vars so .NET Core uses the expected culture (can be overridden via docker run -e)
-# - Starts nginx and CumulusMX (dotnet) and tails the MXDiags log to stdout with tail -F
-# - Handles SIGTERM to shut down cleanly and persist config files
-
-# Ensure .NET uses system globalization (if image default or user hasn't set)
-export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=${DOTNET_SYSTEM_GLOBALIZATION_INVARIANT:-false}
-
-# --- Timezone handling (apply at container start so docker run -e TZ=... is honored) ---
+# --- Timezone handling ---
 if [ -n "$TZ" ]; then
   if [ -f "/usr/share/zoneinfo/$TZ" ]; then
     ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime
     echo "$TZ" > /etc/timezone
     echo "Timezone set to $TZ"
   else
-    echo "Warning: timezone '/usr/share/zoneinfo/$TZ' not found. Leaving image default (TZ=${TZ:-ETC/UTC})."
+    echo "Warning: timezone '/usr/share/zoneinfo/$TZ' not found."
   fi
 else
-  echo "TZ not set; using image default TZ=${TZ:-ETC/UTC}"
+  echo "TZ not set; using image default"
 fi
 
-# --- Derive LANG from TZ if LANG is not explicitly provided ---
-if [ -z "${LANG}" ] || [ "${LANG}" = "C.UTF-8" ] || [ "${LANG}" = "C" ]; then
-  derived_lang=""
+# --- Locale handling ---
+
+# Helper: find the actual locale string from locale -a (exact match required!)
+_find_available_locale() {
+  local want="$1"
+  local base="${want%%.*}"
+  
+  # Try common patterns in order of preference
+  local match
+  
+  # 1. Try exact match (case-sensitive)
+  match=$(locale -a 2>/dev/null | grep -x "$want" | head -n1)
+  if [ -n "$match" ]; then
+    echo "$match"
+    return 0
+  fi
+  
+  # 2. Try base. utf8 (most common in locales-all)
+  match=$(locale -a 2>/dev/null | grep -x "${base}.utf8" | head -n1)
+  if [ -n "$match" ]; then
+    echo "$match"
+    return 0
+  fi
+  
+  # 3. Try base. UTF-8 (less common but possible)
+  match=$(locale -a 2>/dev/null | grep -x "${base}.UTF-8" | head -n1)
+  if [ -n "$match" ]; then
+    echo "$match"
+    return 0
+  fi
+  
+  # 4. Try just base without charset
+  match=$(locale -a 2>/dev/null | grep -x "$base" | head -n1)
+  if [ -n "$match" ]; then
+    echo "$match"
+    return 0
+  fi
+  
+  # 5. Try case-insensitive match as last resort
+  match=$(locale -a 2>/dev/null | grep -ix "$want" | head -n1)
+  if [ -n "$match" ]; then
+    echo "$match"
+    return 0
+  fi
+  
+  # 6. Try base with any suffix (case-insensitive)
+  match=$(locale -a 2>/dev/null | grep -i "^${base}" | head -n1)
+  if [ -n "$match" ]; then
+    echo "$match"
+    return 0
+  fi
+  
+  return 1
+}
+
+# Helper: map TZ to locale base (without charset)
+_map_tz_to_locale() {
+  case "$1" in
+    "Pacific/Auckland"|"NZ"|"Antarctica/McMurdo") echo "en_NZ" ;;
+    "Australia/"*) echo "en_AU" ;;
+    "Europe/London"|"Europe/Dublin"|"Europe/Guernsey"|"Europe/Jersey"|"Europe/Isle_of_Man") echo "en_GB" ;;
+    "America/"*) echo "en_US" ;;
+    "Asia/Tokyo"|"Asia/Okinawa") echo "ja_JP" ;;
+    "Asia/Shanghai"|"Asia/Hong_Kong"|"Asia/Singapore") echo "zh_CN" ;;
+    "Asia/Seoul") echo "ko_KR" ;;
+    "Europe/Paris"|"Europe/Brussels"|"Europe/Zurich"|"Europe/Luxembourg") echo "fr_FR" ;;
+    "Europe/Berlin"|"Europe/Amsterdam"|"Europe/Vienna") echo "de_DE" ;;
+    Europe/*) echo "en_GB" ;;
+    Pacific/*|Australia/*) echo "en_AU" ;;
+    Asia/*) echo "en_US" ;;
+    Africa/*) echo "en_GB" ;;
+    *) echo "en_GB" ;;
+  esac
+}
+
+# Determine desired locale base (without charset)
+desired_base=""
+
+if [ -n "$LANG" ] && [ "$LANG" != "C. UTF-8" ] && [ "$LANG" != "C" ]; then
+  # User provided LANG - extract base
+  desired_base="${LANG%%.*}"
+else
+  # Derive from TZ
   if [ -n "$TZ" ]; then
-    tz_short=$(basename "$TZ")
-    case "$TZ" in
-      "Pacific/Auckland"|"NZ"|"Antarctica/McMurdo")
-        derived_lang="en_NZ.UTF-8"
-        ;;
-      "Australia/Sydney"|"Australia/Melbourne"|"Australia/Brisbane"|"Australia/Perth"|"Australia/Adelaide")
-        derived_lang="en_AU.UTF-8"
-        ;;
-      "Europe/London"|"Europe/Guernsey"|"Europe/Jersey"|"Europe/Isle_of_Man"|"Europe/Dublin")
-        derived_lang="en_GB.UTF-8"
-        ;;
-      "America/New_York"|"America/Detroit"|"America/Toronto"|"America/Indiana"*)
-        derived_lang="en_US.UTF-8"
-        ;;
-      "America/Chicago"|"America/Winnipeg"|"America/Mexico_City")
-        derived_lang="en_US.UTF-8"
-        ;;
-      "America/Los_Angeles"|"America/Vancouver"|"America/Anchorage")
-        derived_lang="en_US.UTF-8"
-        ;;
-      "Asia/Tokyo"|"Asia/Okinawa")
-        derived_lang="ja_JP.UTF-8"
-        ;;
-      "Asia/Shanghai"|"Asia/Chongqing"|"Asia/Hong_Kong"|"Asia/Singapore")
-        derived_lang="zh_CN.UTF-8"
-        ;;
-      "Asia/Seoul")
-        derived_lang="ko_KR.UTF-8"
-        ;;
-      "Europe/Paris"|"Europe/Brussels"|"Europe/Zurich"|"Europe/Luxembourg")
-        derived_lang="fr_FR.UTF-8"
-        ;;
-      "Europe/Berlin"|"Europe/Amsterdam"|"Europe/Vienna")
-        derived_lang="de_DE.UTF-8"
-        ;;
-      "Pacific/Honolulu")
-        derived_lang="en_US.UTF-8"
-        ;;
-      *)
-        case "$TZ" in
-          Europe/*) derived_lang="en_GB.UTF-8" ;;
-          America/*) derived_lang="en_US.UTF-8" ;;
-          Pacific/*) derived_lang="en_AU.UTF-8" ;;
-          Australia/*) derived_lang="en_AU.UTF-8" ;;
-          Asia/*) derived_lang="en_US.UTF-8" ;;
-          Africa/*) derived_lang="en_GB.UTF-8" ;;
-          Atlantic/*|Indian/*|Arctic/*|Antarctica/*) derived_lang="en_US.UTF-8" ;;
-          *) derived_lang="" ;;
-        esac
-        ;;
-    esac
+    desired_base=$(_map_tz_to_locale "$TZ")
   fi
-
-  if [ -n "$derived_lang" ]; then
-    if locale -a 2>/dev/null | grep -i -q "^${derived_lang%%.*}"; then
-      export LANG=$derived_lang
-      export LANGUAGE=${LANGUAGE:-${LANG%%.*}:en}
-      export LC_ALL=${LC_ALL:-$LANG}
-      echo "Derived locale from TZ: LANG=$LANG"
-    else
-      if locale -a 2>/dev/null | tr '[:upper:]' '[:lower:]' | grep -q "$(echo $derived_lang | tr '[:upper:]' '[:lower:]' | sed 's/\.utf-8//')"; then
-        match=$(locale -a 2>/dev/null | tr '[:upper:]' '[:lower:]' | grep "$(echo $derived_lang | tr '[:upper:]' '[:lower:]' | sed 's/\.utf-8//')" | head -n1)
-        export LANG="$match"
-        export LANGUAGE=${LANGUAGE:-${match%%.*}:en}
-        export LC_ALL=${LC_ALL:-$LANG}
-        echo "Derived locale from TZ (case-insensitive match): LANG=$LANG"
-      else
-        echo "Derived LANG would be $derived_lang but that locale is not present in the image. Leaving LANG unset so image default/user-supplied LANG applies."
-      fi
-    fi
-  else
-    echo "Could not derive a locale from TZ ($TZ); leaving LANG to image default or user-supplied value."
+  
+  # Fallback
+  if [ -z "$desired_base" ]; then
+    desired_base="en_GB"
   fi
-else
-  echo "LANG is already set to '$LANG' — skipping derivation from TZ."
 fi
 
-# --- Migration logic (unchanged) ---
+# Find the actual available locale string
+actual_locale=$(_find_available_locale "${desired_base}. utf8")
+if [ -z "$actual_locale" ]; then
+  actual_locale=$(_find_available_locale "${desired_base}. UTF-8")
+fi
+if [ -z "$actual_locale" ]; then
+  actual_locale=$(_find_available_locale "$desired_base")
+fi
+
+if [ -z "$actual_locale" ]; then
+  locale -a 2>/dev/null | grep -i "$desired_base"
+  actual_locale="C.UTF-8"
+fi
+
+# Export ALL locale variables with the exact string from locale -a
+export LANG="$actual_locale"
+export LC_ALL="$actual_locale"
+export LC_CTYPE="$actual_locale"
+export LC_NUMERIC="$actual_locale"
+export LC_TIME="$actual_locale"
+export LC_COLLATE="$actual_locale"
+export LC_MONETARY="$actual_locale"
+export LC_MESSAGES="$actual_locale"
+export LC_PAPER="$actual_locale"
+export LC_NAME="$actual_locale"
+export LC_ADDRESS="$actual_locale"
+export LC_TELEPHONE="$actual_locale"
+export LC_MEASUREMENT="$actual_locale"
+export LC_IDENTIFICATION="$actual_locale"
+
+# Calculate LANGUAGE (use base without charset)
+lang_short="${desired_base}"
+lang_code="${lang_short%%_*}"
+export LANGUAGE="${lang_short}:${lang_code}"
+
+# Persist to config files (so new shells inherit the locale)
+cat > /etc/default/locale <<EOF
+LANG="$LANG"
+LC_ALL="$LC_ALL"
+LANGUAGE="$LANGUAGE"
+EOF
+
+# Update /etc/environment for system-wide persistence
+grep -v "^LANG=\|^LC_\|^LANGUAGE=" /etc/environment 2>/dev/null > /tmp/envfile.tmp || touch /tmp/envfile.tmp
+cat >> /tmp/envfile.tmp <<EOF
+LANG="$LANG"
+LC_ALL="$LC_ALL"
+LC_CTYPE="$LC_CTYPE"
+LC_NUMERIC="$LC_NUMERIC"
+LC_TIME="$LC_TIME"
+LC_COLLATE="$LC_COLLATE"
+LC_MONETARY="$LC_MONETARY"
+LC_MESSAGES="$LC_MESSAGES"
+LC_PAPER="$LC_PAPER"
+LC_NAME="$LC_NAME"
+LC_ADDRESS="$LC_ADDRESS"
+LC_TELEPHONE="$LC_TELEPHONE"
+LC_MEASUREMENT="$LC_MEASUREMENT"
+LC_IDENTIFICATION="$LC_IDENTIFICATION"
+LANGUAGE="$LANGUAGE"
+EOF
+cat /tmp/envfile.tmp > /etc/environment
+rm -f /tmp/envfile.tmp
+
+# Ensure . NET uses system globalization
+export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=${DOTNET_SYSTEM_GLOBALIZATION_INVARIANT:-false}
+
+# --- End locale handling ---
+
+# --- Migration logic ---
 if [ "$MIGRATE" != "false" ]; then
   echo "Migration enabled. Begin migration checks..."
   if [ "$(ls -A /opt/CumulusMX/data/ 2>/dev/null | wc -l)" -gt 1 ] || [ "$MIGRATE" == "force" ]; then
@@ -157,7 +228,7 @@ else
   echo "Migration is disabled... Skipping migration."
 fi
 
-# Start NGINX web server (no nginx config changes performed here)
+# Start NGINX web server
 service nginx start
 
 # Copy Web Support files (ignore errors if none)

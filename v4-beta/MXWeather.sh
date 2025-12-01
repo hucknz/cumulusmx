@@ -89,27 +89,21 @@ _map_tz_to_locale() {
   esac
 }
 
-echo "=== Locale Configuration ==="
-echo "Initial environment: LANG='$LANG' TZ='$TZ'"
-
 # Determine desired locale base (without charset)
 desired_base=""
 
 if [ -n "$LANG" ] && [ "$LANG" != "C. UTF-8" ] && [ "$LANG" != "C" ]; then
   # User provided LANG - extract base
   desired_base="${LANG%%.*}"
-  echo "User-supplied LANG base: $desired_base"
 else
   # Derive from TZ
   if [ -n "$TZ" ]; then
     desired_base=$(_map_tz_to_locale "$TZ")
-    echo "Derived from TZ: $desired_base"
   fi
   
   # Fallback
   if [ -z "$desired_base" ]; then
     desired_base="en_GB"
-    echo "Using default: $desired_base"
   fi
 fi
 
@@ -123,14 +117,8 @@ if [ -z "$actual_locale" ]; then
 fi
 
 if [ -z "$actual_locale" ]; then
-  echo "WARNING: Could not find locale for '$desired_base' in system"
-  echo "Available locales matching '${desired_base}':"
-  locale -a 2>/dev/null | grep -i "$desired_base" || echo "(none found)"
-  echo ""
-  echo "Falling back to C.UTF-8"
+  locale -a 2>/dev/null | grep -i "$desired_base"
   actual_locale="C.UTF-8"
-else
-  echo "Found available locale: $actual_locale"
 fi
 
 # Export ALL locale variables with the exact string from locale -a
@@ -183,23 +171,12 @@ EOF
 cat /tmp/envfile.tmp > /etc/environment
 rm -f /tmp/envfile.tmp
 
-echo "=== Final Locale Settings ==="
-echo "LANG=$LANG"
-echo "LC_ALL=$LC_ALL"
-echo "LANGUAGE=$LANGUAGE"
-echo "============================"
-
-# Verify locale is working
-echo "Verifying locale (output from 'locale' command):"
-locale
-echo "============================"
-
 # Ensure . NET uses system globalization
 export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=${DOTNET_SYSTEM_GLOBALIZATION_INVARIANT:-false}
 
-# --- End runtime locale handling ---
+# --- End locale handling ---
 
-# --- Migration logic
+# --- Migration logic ---
 if [ "$MIGRATE" != "false" ]; then
   echo "Migration enabled. Begin migration checks..."
   if [ "$(ls -A /opt/CumulusMX/data/ 2>/dev/null | wc -l)" -gt 1 ] || [ "$MIGRATE" == "force" ]; then
