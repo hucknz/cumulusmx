@@ -2,153 +2,201 @@
 set -e
 
 # MXWeather.sh - container entrypoint for CumulusMX
-# - Applies runtime TZ if provided
-# - Derives a sensible LANG/LC_* from TZ when LANG is not provided by the user
-# - Exports locale env vars so . NET Core uses the expected culture (can be overridden via docker run -e)
-# - Starts nginx and CumulusMX (dotnet) and tails the MXDiags log to stdout with tail -F
-# - Handles SIGTERM to shut down cleanly and persist config files
 
-# --- Timezone handling (apply at container start so docker run -e TZ=...  is honored) ---
+# --- Timezone handling ---
 if [ -n "$TZ" ]; then
   if [ -f "/usr/share/zoneinfo/$TZ" ]; then
     ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime
     echo "$TZ" > /etc/timezone
     echo "Timezone set to $TZ"
   else
-    echo "Warning: timezone '/usr/share/zoneinfo/$TZ' not found.  Leaving image default (TZ=${TZ:-ETC/UTC})."
+    echo "Warning: timezone '/usr/share/zoneinfo/$TZ' not found."
   fi
 else
-  echo "TZ not set; using image default TZ=${TZ:-ETC/UTC}"
+  echo "TZ not set; using image default"
 fi
 
 # --- Locale handling ---
 
-# Helper: normalize locale to include . UTF-8 suffix
-_normalize_lang() {
-  local l="$1"
-  if [ -z "$l" ]; then
-    echo ""
+# Helper: find the actual locale string from locale -a (exact match required!)
+_find_available_locale() {
+  local want="$1"
+  local base="${want%%.*}"  # e.g., en_NZ from en_NZ.UTF-8 or en_NZ. utf8
+  
+  # locale -a output is case-sensitive and uses lowercase 'utf8'
+  # Try common patterns in order of preference
+  
+  # 1. Try exact match (case-sensitive)
+  local match=$(locale -a 2>/dev/null | grep -x "$want" | head -n1)
+  if [ -n "$match" ]; then
+    echo "$match"
     return 0
   fi
-  # If already has charset, normalize utf8 variants to UTF-8
-  if echo "$l" | grep -qE '\.'; then
-    echo "$l" | sed -E 's/\.[Uu][Tt][Ff]-? 8$/. UTF-8/'
-  else
-    echo "${l}.UTF-8"
+  
+  # 2. Try base. utf8 (most common in locales-all)
+  match=$(locale -a 2>/dev/null | grep -x "${base}.utf8" | head -n1)
+  if [ -n "$match" ]; then
+    echo "$match"
+    return 0
   fi
+  
+  # 3. Try base. UTF-8 (less common but possible)
+  match=$(locale -a 2>/dev/null | grep -x "${base}.UTF-8" | head -n1)
+  if [ -n "$match" ]; then
+    echo "$match"
+    return 0
+  fi
+  
+  # 4. Try just base without charset
+  match=$(locale -a 2>/dev/null | grep -x "$base" | head -n1)
+  if [ -n "$match" ]; then
+    echo "$match"
+    return 0
+  fi
+  
+  # 5. Try case-insensitive match as last resort
+  match=$(locale -a 2>/dev/null | grep -ix "$want" | head -n1)
+  if [ -n "$match" ]; then
+    echo "$match"
+    return 0
+  fi
+  
+  # 6. Try base with any suffix (case-insensitive)
+  match=$(locale -a 2>/dev/null | grep -i "^${base}" | head -n1)
+  if [ -n "$match" ]; then
+    echo "$match"
+    return 0
+  fi
+  
+  return 1
 }
 
-# Helper: map TZ to locale
+# Helper: map TZ to locale base (without charset)
 _map_tz_to_locale() {
   case "$1" in
-    "Pacific/Auckland"|"NZ"|"Antarctica/McMurdo")
-      echo "en_NZ.UTF-8" ;;
-    "Australia/Sydney"|"Australia/Melbourne"|"Australia/Brisbane"|"Australia/Perth"|"Australia/Adelaide")
-      echo "en_AU. UTF-8" ;;
-    "Europe/London"|"Europe/Guernsey"|"Europe/Jersey"|"Europe/Isle_of_Man"|"Europe/Dublin")
-      echo "en_GB. UTF-8" ;;
-    "America/New_York"|"America/Detroit"|"America/Toronto"|"America/Indiana"*)
-      echo "en_US. UTF-8" ;;
-    "America/Chicago"|"America/Winnipeg"|"America/Mexico_City")
-      echo "en_US. UTF-8" ;;
-    "America/Los_Angeles"|"America/Vancouver"|"America/Anchorage")
-      echo "en_US. UTF-8" ;;
-    "Asia/Tokyo"|"Asia/Okinawa")
-      echo "ja_JP.UTF-8" ;;
-    "Asia/Shanghai"|"Asia/Chongqing"|"Asia/Hong_Kong"|"Asia/Singapore")
-      echo "zh_CN. UTF-8" ;;
-    "Asia/Seoul")
-      echo "ko_KR.UTF-8" ;;
-    "Europe/Paris"|"Europe/Brussels"|"Europe/Zurich"|"Europe/Luxembourg")
-      echo "fr_FR. UTF-8" ;;
-    "Europe/Berlin"|"Europe/Amsterdam"|"Europe/Vienna")
-      echo "de_DE. UTF-8" ;;
-    "Pacific/Honolulu")
-      echo "en_US.UTF-8" ;;
-    *)
-      case "$1" in
-        Europe/*) echo "en_GB.UTF-8" ;;
-        America/*) echo "en_US. UTF-8" ;;
-        Pacific/*|Australia/*) echo "en_AU.UTF-8" ;;
-        Asia/*) echo "en_US. UTF-8" ;;
-        Africa/*) echo "en_GB.UTF-8" ;;
-        Atlantic/*|Indian/*|Arctic/*|Antarctica/*) echo "en_US. UTF-8" ;;
-        *) echo "" ;;
-      esac
-      ;;
+    "Pacific/Auckland"|"NZ"|"Antarctica/McMurdo") echo "en_NZ" ;;
+    "Australia/"*) echo "en_AU" ;;
+    "Europe/London"|"Europe/Dublin"|"Europe/Guernsey"|"Europe/Jersey"|"Europe/Isle_of_Man") echo "en_GB" ;;
+    "America/"*) echo "en_US" ;;
+    "Asia/Tokyo"|"Asia/Okinawa") echo "ja_JP" ;;
+    "Asia/Shanghai"|"Asia/Hong_Kong"|"Asia/Singapore") echo "zh_CN" ;;
+    "Asia/Seoul") echo "ko_KR" ;;
+    "Europe/Paris"|"Europe/Brussels"|"Europe/Zurich"|"Europe/Luxembourg") echo "fr_FR" ;;
+    "Europe/Berlin"|"Europe/Amsterdam"|"Europe/Vienna") echo "de_DE" ;;
+    Europe/*) echo "en_GB" ;;
+    Pacific/*|Australia/*) echo "en_AU" ;;
+    Asia/*) echo "en_US" ;;
+    Africa/*) echo "en_GB" ;;
+    *) echo "en_GB" ;;
   esac
 }
 
-# Determine effective locale
-effective_lang=""
+echo "=== Locale Configuration ==="
+echo "Initial environment: LANG='$LANG' TZ='$TZ'"
 
-# Check if user explicitly provided LANG (not C or C.UTF-8)
+# Determine desired locale base (without charset)
+desired_base=""
+
 if [ -n "$LANG" ] && [ "$LANG" != "C. UTF-8" ] && [ "$LANG" != "C" ]; then
-  # User explicitly provided LANG - use it
-  effective_lang=$(_normalize_lang "$LANG")
-  echo "User-supplied LANG: $effective_lang"
+  # User provided LANG - extract base
+  desired_base="${LANG%%.*}"  # Remove . UTF-8 or .utf8 or other charset
+  echo "User-supplied LANG base: $desired_base"
 else
   # Derive from TZ
   if [ -n "$TZ" ]; then
-    derived=$(_map_tz_to_locale "$TZ")
-    if [ -n "$derived" ]; then
-      effective_lang="$derived"
-      echo "Derived locale from TZ: $effective_lang"
-    fi
+    desired_base=$(_map_tz_to_locale "$TZ")
+    echo "Derived from TZ: $desired_base"
   fi
   
-  # Fallback to default
-  if [ -z "$effective_lang" ]; then
-    effective_lang="en_GB.UTF-8"
-    echo "Using default locale: $effective_lang"
+  # Fallback
+  if [ -z "$desired_base" ]; then
+    desired_base="en_GB"
+    echo "Using default: $desired_base"
   fi
 fi
 
-# Export locale variables for this script and child processes
-export LANG="$effective_lang"
-export LC_ALL="$effective_lang"
-export LC_CTYPE="$effective_lang"
+# Find the actual available locale string (tries . utf8, . UTF-8, and bare formats)
+actual_locale=$(_find_available_locale "$desired_base. utf8")
+if [ -z "$actual_locale" ]; then
+  actual_locale=$(_find_available_locale "$desired_base. UTF-8")
+fi
+if [ -z "$actual_locale" ]; then
+  actual_locale=$(_find_available_locale "$desired_base")
+fi
 
-# Calculate LANGUAGE from LANG
-lang_short="${LANG%%.*}"      # e.g., en_NZ
-lang_code="${lang_short%%_*}" # e.g., en
+if [ -z "$actual_locale" ]; then
+  echo "WARNING: Could not find locale for '$desired_base' in system"
+  echo "Available locales matching '${desired_base}':"
+  locale -a 2>/dev/null | grep -i "$desired_base" || echo "(none found)"
+  echo ""
+  echo "Falling back to C.UTF-8"
+  actual_locale="C. UTF-8"
+else
+  echo "Found available locale: $actual_locale"
+fi
+
+# Export ALL locale variables with the exact string from locale -a
+export LANG="$actual_locale"
+export LC_ALL="$actual_locale"
+export LC_CTYPE="$actual_locale"
+export LC_NUMERIC="$actual_locale"
+export LC_TIME="$actual_locale"
+export LC_COLLATE="$actual_locale"
+export LC_MONETARY="$actual_locale"
+export LC_MESSAGES="$actual_locale"
+export LC_PAPER="$actual_locale"
+export LC_NAME="$actual_locale"
+export LC_ADDRESS="$actual_locale"
+export LC_TELEPHONE="$actual_locale"
+export LC_MEASUREMENT="$actual_locale"
+export LC_IDENTIFICATION="$actual_locale"
+
+# Calculate LANGUAGE (use base without charset)
+lang_short="${desired_base}"
+lang_code="${lang_short%%_*}"
 export LANGUAGE="${lang_short}:${lang_code}"
 
-# Write to /etc/default/locale so new shells pick it up
+# Persist to config files (so new shells inherit the locale)
 cat > /etc/default/locale <<EOF
 LANG="$LANG"
 LC_ALL="$LC_ALL"
 LANGUAGE="$LANGUAGE"
 EOF
 
-# Write to /etc/environment for system-wide persistence
-grep -v "^LANG=\|^LC_ALL=\|^LANGUAGE=\|^LC_CTYPE=" /etc/environment > /tmp/env.new 2>/dev/null || touch /tmp/env.new
-cat >> /tmp/env.new <<EOF
-LANG="$LANG"
-LC_ALL="$LC_ALL"
-LC_CTYPE="$LC_CTYPE"
-LANGUAGE="$LANGUAGE"
-EOF
+# Update /etc/environment for system-wide persistence
+{
+  grep -v "^LANG=\|^LC_\|^LANGUAGE=" /etc/environment 2>/dev/null || true
+  echo "LANG=\"$LANG\""
+  echo "LC_ALL=\"$LC_ALL\""
+  echo "LC_CTYPE=\"$LC_CTYPE\""
+  echo "LC_NUMERIC=\"$LC_NUMERIC\""
+  echo "LC_TIME=\"$LC_TIME\""
+  echo "LC_COLLATE=\"$LC_COLLATE\""
+  echo "LC_MONETARY=\"$LC_MONETARY\""
+  echo "LC_MESSAGES=\"$LC_MESSAGES\""
+  echo "LC_PAPER=\"$LC_PAPER\""
+  echo "LC_NAME=\"$LC_NAME\""
+  echo "LC_ADDRESS=\"$LC_ADDRESS\""
+  echo "LC_TELEPHONE=\"$LC_TELEPHONE\""
+  echo "LC_MEASUREMENT=\"$LC_MEASUREMENT\""
+  echo "LC_IDENTIFICATION=\"$LC_IDENTIFICATION\""
+  echo "LANGUAGE=\"$LANGUAGE\""
+} > /tmp/env. new
 cat /tmp/env.new > /etc/environment
 rm -f /tmp/env.new
 
-echo "=== Locale Configuration ==="
+echo "=== Final Locale Settings ==="
 echo "LANG=$LANG"
 echo "LC_ALL=$LC_ALL"
-echo "LC_CTYPE=$LC_CTYPE"
 echo "LANGUAGE=$LANGUAGE"
 echo "============================"
 
-# Verify locale is available
-if locale -a 2>/dev/null | grep -qi "^${LANG%%.*}"; then
-  echo "Locale $LANG is available in system"
-else
-  echo "WARNING: Locale $LANG may not be fully available"
-  echo "Available locales:"
-  locale -a 2>/dev/null | head -20
-fi
+# Verify locale is working
+echo "Verifying locale (output from 'locale' command):"
+locale
+echo "============================"
 
-# Ensure . NET uses system globalization (set AFTER locale configuration)
+# Ensure . NET uses system globalization
 export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=${DOTNET_SYSTEM_GLOBALIZATION_INVARIANT:-false}
 
 # --- End runtime locale handling ---
