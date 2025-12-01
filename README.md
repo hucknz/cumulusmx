@@ -3,20 +3,6 @@
 ## Overview
 Cumulus MX is a cross platform version of the Cumulus weather station software. [Learn more](https://www.cumuluswiki.org/a/Main_Page) at the Cumulus wiki.
 
-## Important changes for v4 ##
-
-**The `cumulusmx:latest` tag is now running CumulusMX v4 as of 9 July 2024.**
-
-`cumulusmx:v3` will remain available for version 3 builds. These will be updated regularly to avoid the containers going stale or security flaws being left open. 
-
-### Data migration ###
-
-v4 has a completely new data structure, therefore your files will need to be migrated. **The v4 release migrates from the v3 to the v4 data structure by default.** You can disable the migration by adding an environment variable `MIGRATE=false` to your docker-compose or `-e MIGRATE=false` for docker run. If you use Custom Daily log files you will need to pass a list of these through an environment variable too. See migration detail below for more information. 
-
-**Please ensure you back up your data files before updating to v4. I can not guarantee the migration will work correctly for you.**
-
-You can see the migration logic [below](#migration). There is more detail regarding the CumulusMX version changes available [here](https://cumulus.hosiene.co.uk/viewtopic.php?t=22051).
-
 ## Usage
 1. Ensure Docker is installed and configured on the host machine (I recommend using DockSTARTer if you want an easy way to get started with Docker)
 2. Clone the [docker-compose.yml](https://github.com/hucknz/cumulusmx/blob/main/docker-compose.yml) and [.env](https://github.com/hucknz/cumulusmx/blob/main/.env) files to your local machine
@@ -31,13 +17,30 @@ You can see the migration logic [below](#migration). There is more detail regard
 
 Note: config changes won't be committed to the INI file outside the container unless the container receives a SIGTERM. The config file is persistent inside the container until the container is rebuilt or updated.
 
+## Environment variables
+`LANG`: Optional. If not set will try to infer from Timezone or fallback to en_GB. 
+`MIGRATE`: Optional for v4 only. If you don't want to migrate set to false or use force to force a migration to run.
+`MIGRATE_CUSTOM_LOG_FILES` # Optional for v4 only. Add any Custom Daily log files you'd like migrated. Format is "File1 File2 File3".
+`PORT`: Set a custom port for CumulusMX to use. Helpful for running multiple instances or non-standard ports. See known issues below for more detail on port mapping. 
+
 ## Known Issues:
 * If using the docker compose file and `/dev/hidraw0` device is not present the container will fail to start.
+* CumulusMX does not work well with mapped ports. If you need to run on a different port use the `PORT=` environment variable and ensure the CumulusMX port and the docker port are the same. 
 
 # Container builds
 The upstream repo for Cumulus MX is checked daily for new releases. When a new release is identified the build process should automatically trigger and commit a new build to https://hub.docker.com/r/hucknz/cumulusmx and https://ghcr.io/hucknz/cumulusmx. You can use the v3 or v4 tags to get the latest build of each version. 
 
-# Migration
+# Important changes for v4 #
+
+**The `cumulusmx:latest` tag is now running CumulusMX v4 as of 9 July 2024.**
+
+`cumulusmx:v3` will remain available for version 3 builds. These will be updated regularly to avoid the containers going stale or security flaws being left open. 
+
+**Please ensure you back up your data files before updating to v4. I can not guarantee the migration will work correctly for you.**
+
+You can see the migration logic [below](#migration). There is more detail regarding the CumulusMX version changes available [here](https://cumulus.hosiene.co.uk/viewtopic.php?t=22051).
+
+## Migration
 For v4 there is a new data structure. The v4 container will automatically migrate unless told not to. 
 
 You can disable the migration by adding an environment variable `MIGRATE=false` to your docker-compose or `-e MIGRATE=false` for docker run. 
