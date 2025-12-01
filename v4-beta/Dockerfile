@@ -42,11 +42,6 @@ RUN echo -e "\ndaemon off;" >> /etc/nginx/nginx.conf && \
 # Ensure .NET uses system globalization data (not invariant)
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
-# Set default locale environment variables (can be overridden at runtime)
-ENV LANG=en_GB.UTF-8
-ENV LANGUAGE=en_GB:en
-ENV LC_ALL=en_GB.UTF-8
-
 # Use CACHEBUST to ensure latest CumulusMX is downloaded
 ARG CACHEBUST=1
 
