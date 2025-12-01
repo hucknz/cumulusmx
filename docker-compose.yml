@@ -8,6 +8,7 @@
       - LANG=${LANG} # Optional. If not set will try to infer from Timezone or fallback to en_GB. 
       - MIGRATE=false # Optional for v4 only. Can be removed as migration will run automatically. If you don't want to migrate set to false or use force to force a migration to run.  
       - MIGRATE_CUSTOM_LOG_FILES="File1 File2 File3" # Optional for v4 only. Add any Custom Daily log files filenames you'd like migrated. Remove if not required. 
+      - PORT=8998 # Optional. Specify the port here if you need to use a non-standard port. Defaults to 8998. Don't forget to update the port mapping too. 
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKERCONFDIR}/cumulusmx/data:/opt/CumulusMX/data
