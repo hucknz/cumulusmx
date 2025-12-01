@@ -15,93 +15,36 @@ if [ -n "$TZ" ]; then
     echo "$TZ" > /etc/timezone
     echo "Timezone set to $TZ"
   else
-    echo "Warning: timezone '/usr/share/zoneinfo/$TZ' not found.  Leaving image default (TZ=${TZ:-ETC/UTC})."
+    echo "Warning: timezone '/usr/share/zoneinfo/$TZ' not found. Leaving image default (TZ=${TZ:-ETC/UTC})."
   fi
 else
   echo "TZ not set; using image default TZ=${TZ:-ETC/UTC}"
 fi
 
-# --- Robust runtime locale handling ---
-# Priority for effective LANG:
-# 1) If LANG explicitly provided (and not C/C. UTF-8), use it (ensure . UTF-8)
-# 2) Else derive LANG from TZ using mapping logic below (only if locale exists)
-# 3) Else fall back to image default LANG or en_GB. UTF-8
+# --- Locale handling ---
 
-# Image default LANG (set at build time in Dockerfile).  We treat LC_ALL equal to this as "not explicitly provided"
-IMAGE_DEFAULT_LANG="en_GB.UTF-8"
-
-# Helper: normalize locale string to include .UTF-8 suffix if missing
+# Helper: normalize locale to include . UTF-8 suffix
 _normalize_lang() {
   local l="$1"
   if [ -z "$l" ]; then
     echo ""
     return 0
   fi
-  # If it already contains a dot (i.e.  charset), respect it; if user passed e.g. en_US.utf8 normalize to . UTF-8
+  # If already has charset, normalize utf8 variants to UTF-8
   if echo "$l" | grep -qE '\. '; then
-    # Normalize common utf8 variants to UTF-8
-    echo "$l" | sed -E 's/\.[Uu][Tt][Ff]-? 8$/. UTF-8/'
+    echo "$l" | sed -E 's/\.[Uu][Tt][Ff]-? 8$/.UTF-8/'
   else
     echo "${l}. UTF-8"
   fi
 }
 
-# Helper: check whether a locale exists on the system (case-insensitive, tolerate . utf8 / .UTF-8 / no-suffix)
-_locale_exists() {
-  local want="$1"
-  if [ -z "$want" ]; then
-    return 1
-  fi
-  
-  # Check if locale command is available
-  if ! command -v locale >/dev/null 2>&1; then
-    echo "Warning: locale command not found, assuming locale exists" >&2
-    return 0
-  fi
-  
-  # Get base (e.g., en_NZ from en_NZ.UTF-8)
-  local base="${want%%.*}"
-  
-  # Check for exact match or base match (case-insensitive)
-  if locale -a 2>/dev/null | grep -iq "^${want}$\|^${base}$\|^${base}\.utf"; then
-    return 0
-  fi
-  
-  return 1
-}
-
-# Helper: attempt to find a matching locale string from locale -a and return it (first found)
-# IMPORTANT: Always return with .UTF-8 suffix for consistency
-_find_locale_match() {
-  local want="$1"
-  local base="${want%%.*}"
-  
-  # Try to find exact match first (with .UTF-8 or . utf8)
-  match="$(locale -a 2>/dev/null | grep -iE "^${want}$|^${base}\.(utf-?8|UTF-?8)$" | head -n1 || true)"
-  if [ -n "$match" ]; then
-    # Normalize the match to always have .UTF-8
-    echo "$match" | sed -E 's/\.[Uu][Tt][Ff]-?8$/.UTF-8/'
-    return 0
-  fi
-  
-  # Try just base match (e.g., en_NZ without suffix)
-  match="$(locale -a 2>/dev/null | grep -iE "^${base}$" | head -n1 || true)"
-  if [ -n "$match" ]; then
-    # Add .UTF-8 suffix if base found without it
-    echo "${match}.UTF-8"
-    return 0
-  fi
-  
-  return 1
-}
-
-# Helper: map TZ -> reasonable locale (extendable)
+# Helper: map TZ to locale
 _map_tz_to_locale() {
   case "$1" in
     "Pacific/Auckland"|"NZ"|"Antarctica/McMurdo")
       echo "en_NZ.UTF-8" ;;
     "Australia/Sydney"|"Australia/Melbourne"|"Australia/Brisbane"|"Australia/Perth"|"Australia/Adelaide")
-      echo "en_AU.UTF-8" ;;
+      echo "en_AU. UTF-8" ;;
     "Europe/London"|"Europe/Guernsey"|"Europe/Jersey"|"Europe/Isle_of_Man"|"Europe/Dublin")
       echo "en_GB. UTF-8" ;;
     "America/New_York"|"America/Detroit"|"America/Toronto"|"America/Indiana"*)
@@ -121,11 +64,11 @@ _map_tz_to_locale() {
     "Europe/Berlin"|"Europe/Amsterdam"|"Europe/Vienna")
       echo "de_DE. UTF-8" ;;
     "Pacific/Honolulu")
-      echo "en_US.UTF-8" ;;
+      echo "en_US. UTF-8" ;;
     *)
       case "$1" in
         Europe/*) echo "en_GB.UTF-8" ;;
-        America/*) echo "en_US. UTF-8" ;;
+        America/*) echo "en_US.UTF-8" ;;
         Pacific/*|Australia/*) echo "en_AU.UTF-8" ;;
         Asia/*) echo "en_US.UTF-8" ;;
         Africa/*) echo "en_GB.UTF-8" ;;
@@ -136,114 +79,47 @@ _map_tz_to_locale() {
   esac
 }
 
-# Determine effective LANG
-# Consider LANG set and not equal to C/C.UTF-8 as explicit
+# Determine effective locale
 effective_lang=""
 
-echo "DEBUG: Initial LANG='$LANG' TZ='$TZ'"
-
+# Check if user explicitly provided LANG (not C or C.UTF-8)
 if [ -n "$LANG" ] && [ "$LANG" != "C. UTF-8" ] && [ "$LANG" != "C" ]; then
-  # User explicitly provided LANG
-  echo "User-supplied LANG detected: $LANG"
-  tmp_lang=$(_normalize_lang "$LANG")
-  echo "DEBUG: Normalized to: $tmp_lang"
-  
-  if _locale_exists "$tmp_lang"; then
-    # Try to find a canonical entry from locale -a for better compatibility
-    match=$(_find_locale_match "$tmp_lang" || true)
-    if [ -n "$match" ]; then
-      effective_lang="$match"
-      echo "User-supplied LANG found in system: $effective_lang"
-    else
-      effective_lang="$tmp_lang"
-      echo "User-supplied LANG normalized: $effective_lang"
-    fi
-  else
-    # Locale not found, but still use it (may work or fall back)
-    effective_lang="$tmp_lang"
-    echo "Warning: user-supplied LANG '$LANG' -> '$effective_lang' not found in system, but will be set anyway"
-  fi
+  # User explicitly provided LANG - use it
+  effective_lang=$(_normalize_lang "$LANG")
+  echo "User-supplied LANG: $effective_lang"
 else
-  # No explicit LANG provided by user; attempt to derive from TZ
-  derived=""
+  # Derive from TZ
   if [ -n "$TZ" ]; then
     derived=$(_map_tz_to_locale "$TZ")
-    echo "DEBUG: Derived locale from TZ: $derived"
-  fi
-
-  if [ -n "$derived" ]; then
-    derived_norm=$(_normalize_lang "$derived")
-    if _locale_exists "$derived_norm"; then
-      match=$(_find_locale_match "$derived_norm" || true)
-      if [ -n "$match" ]; then
-        effective_lang="$match"
-      else
-        effective_lang="$derived_norm"
-      fi
-      echo "Derived locale from TZ: LANG=$effective_lang"
-    else
-      echo "Warning: Derived locale $derived_norm not found in system; falling back to default"
-      effective_lang="$IMAGE_DEFAULT_LANG"
+    if [ -n "$derived" ]; then
+      effective_lang="$derived"
+      echo "Derived locale from TZ: $effective_lang"
     fi
-  else
-    echo "Could not derive a locale from TZ ($TZ); using default"
-    effective_lang="$IMAGE_DEFAULT_LANG"
+  fi
+  
+  # Fallback to default
+  if [ -z "$effective_lang" ]; then
+    effective_lang="en_GB.UTF-8"
+    echo "Using default locale: $effective_lang"
   fi
 fi
 
-# If still no effective_lang, fall back to image default
-if [ -z "$effective_lang" ]; then
-  effective_lang="$IMAGE_DEFAULT_LANG"
-  echo "Using image default LANG: $effective_lang"
-fi
-
-# CRITICAL: Ensure effective_lang always has .UTF-8 suffix
-effective_lang=$(_normalize_lang "$effective_lang")
-
-# Export LANG (ensure it's set for the rest of the script/processes)
+# Always export the locale variables (this was the missing piece!)
 export LANG="$effective_lang"
 export LC_ALL="$effective_lang"
-export LC_CTYPE="$effective_lang"
 
-# ALWAYS recalculate LANGUAGE from the effective LANG (don't trust environment)
-lang_short="${LANG%%.*}"   # en_NZ
-lang_code="${lang_short%%_*}" # en
+# Calculate LANGUAGE from LANG
+lang_short="${LANG%%.*}"      # e.g., en_NZ
+lang_code="${lang_short%%_*}" # e.g., en
 export LANGUAGE="${lang_short}:${lang_code}"
 
-echo "=== Final locale settings ==="
+echo "=== Locale Configuration ==="
 echo "LANG=$LANG"
 echo "LC_ALL=$LC_ALL"
 echo "LANGUAGE=$LANGUAGE"
 echo "============================"
 
-# Persist locale to /etc/default/locale and /etc/environment
-if [ "$(id -u)" -eq 0 ]; then
-  cat >/etc/default/locale <<EOF
-LANG=$LANG
-LANGUAGE=$LANGUAGE
-LC_ALL=$LC_ALL
-EOF
-  
-  # Also update /etc/environment to ensure it persists
-  sed -i '/^LANG=/d' /etc/environment 2>/dev/null || true
-  sed -i '/^LC_ALL=/d' /etc/environment 2>/dev/null || true
-  sed -i '/^LANGUAGE=/d' /etc/environment 2>/dev/null || true
-  echo "LANG=$LANG" >> /etc/environment
-  echo "LC_ALL=$LC_ALL" >> /etc/environment
-  echo "LANGUAGE=$LANGUAGE" >> /etc/environment
-  
-  echo "Locale configuration written to /etc/default/locale and /etc/environment"
-else
-  echo "Not running as root; skipping write to /etc/default/locale"
-fi
-
-# Generate locale if it doesn't exist (for Debian/Ubuntu systems)
-if command -v locale-gen >/dev/null 2>&1; then
-  echo "Generating locale: $LANG"
-  locale-gen "$LANG" 2>/dev/null || echo "Warning: locale-gen failed, continuing anyway"
-fi
-
-# Ensure . NET uses system globalization AFTER locale is set
+# Ensure . NET uses system globalization (set AFTER locale configuration)
 export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=${DOTNET_SYSTEM_GLOBALIZATION_INVARIANT:-false}
 
 # --- End runtime locale handling ---
