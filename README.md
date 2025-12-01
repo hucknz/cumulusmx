@@ -19,8 +19,11 @@ Note: config changes won't be committed to the INI file outside the container un
 
 ## Environment variables
 `LANG`: Optional. If not set will try to infer from Timezone or fallback to en_GB. 
+
 `MIGRATE`: Optional for v4 only. If you don't want to migrate set to false or use force to force a migration to run.
+
 `MIGRATE_CUSTOM_LOG_FILES` # Optional for v4 only. Add any Custom Daily log files you'd like migrated. Format is "File1 File2 File3".
+
 `PORT`: Set a custom port for CumulusMX to use. Helpful for running multiple instances or non-standard ports. See known issues below for more detail on port mapping. 
 
 ## Known Issues:
