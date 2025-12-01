@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+# MXWeather.sh - container entrypoint for CumulusMX
+
 # --- Timezone handling ---
 if [ -n "$TZ" ]; then
   if [ -f "/usr/share/zoneinfo/$TZ" ]; then
@@ -19,7 +21,7 @@ fi
 # Helper: find the actual locale string from locale -a (exact match required!)
 _find_available_locale() {
   local want="$1"
-  local base="${want%%.*}"  # e.g., en_NZ from en_NZ.UTF-8 or en_NZ. utf8
+  local base="${want%%.*}"  # e.g., en_NZ from en_NZ.UTF-8 or en_NZ.utf8
   
   # locale -a output is case-sensitive and uses lowercase 'utf8'
   # Try common patterns in order of preference
@@ -113,7 +115,7 @@ else
   fi
 fi
 
-# Find the actual available locale string (tries . utf8, . UTF-8, and bare formats)
+# Find the actual available locale string (tries . utf8, .UTF-8, and bare formats)
 actual_locale=$(_find_available_locale "$desired_base. utf8")
 if [ -z "$actual_locale" ]; then
   actual_locale=$(_find_available_locale "$desired_base. UTF-8")
@@ -123,14 +125,14 @@ if [ -z "$actual_locale" ]; then
 fi
 
 if [ -z "$actual_locale" ]; then
-  echo "WARNING: Could not find locale for '$desired_base' in system"
+  echo "⚠ WARNING: Could not find locale for '$desired_base' in system"
   echo "Available locales matching '${desired_base}':"
   locale -a 2>/dev/null | grep -i "$desired_base" || echo "(none found)"
   echo ""
   echo "Falling back to C.UTF-8"
   actual_locale="C. UTF-8"
 else
-  echo "Found available locale: $actual_locale"
+  echo "✓ Found available locale: $actual_locale"
 fi
 
 # Export ALL locale variables with the exact string from locale -a
@@ -162,26 +164,26 @@ LANGUAGE="$LANGUAGE"
 EOF
 
 # Update /etc/environment for system-wide persistence
-{
-  grep -v "^LANG=\|^LC_\|^LANGUAGE=" /etc/environment 2>/dev/null || true
-  echo "LANG=\"$LANG\""
-  echo "LC_ALL=\"$LC_ALL\""
-  echo "LC_CTYPE=\"$LC_CTYPE\""
-  echo "LC_NUMERIC=\"$LC_NUMERIC\""
-  echo "LC_TIME=\"$LC_TIME\""
-  echo "LC_COLLATE=\"$LC_COLLATE\""
-  echo "LC_MONETARY=\"$LC_MONETARY\""
-  echo "LC_MESSAGES=\"$LC_MESSAGES\""
-  echo "LC_PAPER=\"$LC_PAPER\""
-  echo "LC_NAME=\"$LC_NAME\""
-  echo "LC_ADDRESS=\"$LC_ADDRESS\""
-  echo "LC_TELEPHONE=\"$LC_TELEPHONE\""
-  echo "LC_MEASUREMENT=\"$LC_MEASUREMENT\""
-  echo "LC_IDENTIFICATION=\"$LC_IDENTIFICATION\""
-  echo "LANGUAGE=\"$LANGUAGE\""
-} > /tmp/env. new
-cat /tmp/env.new > /etc/environment
-rm -f /tmp/env.new
+cat > /tmp/envfile. tmp <<EOF
+$(grep -v "^LANG=\|^LC_\|^LANGUAGE=" /etc/environment 2>/dev/null || true)
+LANG="$LANG"
+LC_ALL="$LC_ALL"
+LC_CTYPE="$LC_CTYPE"
+LC_NUMERIC="$LC_NUMERIC"
+LC_TIME="$LC_TIME"
+LC_COLLATE="$LC_COLLATE"
+LC_MONETARY="$LC_MONETARY"
+LC_MESSAGES="$LC_MESSAGES"
+LC_PAPER="$LC_PAPER"
+LC_NAME="$LC_NAME"
+LC_ADDRESS="$LC_ADDRESS"
+LC_TELEPHONE="$LC_TELEPHONE"
+LC_MEASUREMENT="$LC_MEASUREMENT"
+LC_IDENTIFICATION="$LC_IDENTIFICATION"
+LANGUAGE="$LANGUAGE"
+EOF
+cat /tmp/envfile.tmp > /etc/environment
+rm -f /tmp/envfile.tmp
 
 echo "=== Final Locale Settings ==="
 echo "LANG=$LANG"
