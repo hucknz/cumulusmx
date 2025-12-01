@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-# MXWeather.sh - container entrypoint for CumulusMX
-
 # --- Timezone handling ---
 if [ -n "$TZ" ]; then
   if [ -f "/usr/share/zoneinfo/$TZ" ]; then
