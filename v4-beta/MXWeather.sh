@@ -15,7 +15,7 @@ if [ -n "$TZ" ]; then
     echo "$TZ" > /etc/timezone
     echo "Timezone set to $TZ"
   else
-    echo "Warning: timezone '/usr/share/zoneinfo/$TZ' not found. Leaving image default (TZ=${TZ:-ETC/UTC})."
+    echo "Warning: timezone '/usr/share/zoneinfo/$TZ' not found.  Leaving image default (TZ=${TZ:-ETC/UTC})."
   fi
 else
   echo "TZ not set; using image default TZ=${TZ:-ETC/UTC}"
@@ -31,10 +31,10 @@ _normalize_lang() {
     return 0
   fi
   # If already has charset, normalize utf8 variants to UTF-8
-  if echo "$l" | grep -qE '\. '; then
-    echo "$l" | sed -E 's/\.[Uu][Tt][Ff]-? 8$/.UTF-8/'
+  if echo "$l" | grep -qE '\.'; then
+    echo "$l" | sed -E 's/\.[Uu][Tt][Ff]-? 8$/. UTF-8/'
   else
-    echo "${l}. UTF-8"
+    echo "${l}.UTF-8"
   fi
 }
 
@@ -60,19 +60,19 @@ _map_tz_to_locale() {
     "Asia/Seoul")
       echo "ko_KR.UTF-8" ;;
     "Europe/Paris"|"Europe/Brussels"|"Europe/Zurich"|"Europe/Luxembourg")
-      echo "fr_FR.UTF-8" ;;
+      echo "fr_FR. UTF-8" ;;
     "Europe/Berlin"|"Europe/Amsterdam"|"Europe/Vienna")
       echo "de_DE. UTF-8" ;;
     "Pacific/Honolulu")
-      echo "en_US. UTF-8" ;;
+      echo "en_US.UTF-8" ;;
     *)
       case "$1" in
         Europe/*) echo "en_GB.UTF-8" ;;
-        America/*) echo "en_US.UTF-8" ;;
+        America/*) echo "en_US. UTF-8" ;;
         Pacific/*|Australia/*) echo "en_AU.UTF-8" ;;
-        Asia/*) echo "en_US.UTF-8" ;;
+        Asia/*) echo "en_US. UTF-8" ;;
         Africa/*) echo "en_GB.UTF-8" ;;
-        Atlantic/*|Indian/*|Arctic/*|Antarctica/*) echo "en_US.UTF-8" ;;
+        Atlantic/*|Indian/*|Arctic/*|Antarctica/*) echo "en_US. UTF-8" ;;
         *) echo "" ;;
       esac
       ;;
@@ -104,20 +104,49 @@ else
   fi
 fi
 
-# Always export the locale variables (this was the missing piece!)
+# Export locale variables for this script and child processes
 export LANG="$effective_lang"
 export LC_ALL="$effective_lang"
+export LC_CTYPE="$effective_lang"
 
 # Calculate LANGUAGE from LANG
 lang_short="${LANG%%.*}"      # e.g., en_NZ
 lang_code="${lang_short%%_*}" # e.g., en
 export LANGUAGE="${lang_short}:${lang_code}"
 
+# Write to /etc/default/locale so new shells pick it up
+cat > /etc/default/locale <<EOF
+LANG="$LANG"
+LC_ALL="$LC_ALL"
+LANGUAGE="$LANGUAGE"
+EOF
+
+# Write to /etc/environment for system-wide persistence
+grep -v "^LANG=\|^LC_ALL=\|^LANGUAGE=\|^LC_CTYPE=" /etc/environment > /tmp/env.new 2>/dev/null || touch /tmp/env.new
+cat >> /tmp/env.new <<EOF
+LANG="$LANG"
+LC_ALL="$LC_ALL"
+LC_CTYPE="$LC_CTYPE"
+LANGUAGE="$LANGUAGE"
+EOF
+cat /tmp/env.new > /etc/environment
+rm -f /tmp/env.new
+
 echo "=== Locale Configuration ==="
 echo "LANG=$LANG"
 echo "LC_ALL=$LC_ALL"
+echo "LC_CTYPE=$LC_CTYPE"
 echo "LANGUAGE=$LANGUAGE"
 echo "============================"
+
+# Verify locale is available
+if locale -a 2>/dev/null | grep -qi "^${LANG%%.*}"; then
+  echo "Locale $LANG is available in system"
+else
+  echo "WARNING: Locale $LANG may not be fully available"
+  echo "Available locales:"
+  locale -a 2>/dev/null | head -20
+fi
 
 # Ensure . NET uses system globalization (set AFTER locale configuration)
 export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=${DOTNET_SYSTEM_GLOBALIZATION_INVARIANT:-false}
