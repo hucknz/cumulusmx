@@ -15,7 +15,7 @@ if [ -n "$TZ" ]; then
     echo "$TZ" > /etc/timezone
     echo "Timezone set to $TZ"
   else
-    echo "Warning: timezone '/usr/share/zoneinfo/$TZ' not found. Leaving image default (TZ=${TZ:-ETC/UTC})."
+    echo "Warning: timezone '/usr/share/zoneinfo/$TZ' not found.  Leaving image default (TZ=${TZ:-ETC/UTC})."
   fi
 else
   echo "TZ not set; using image default TZ=${TZ:-ETC/UTC}"
@@ -25,24 +25,24 @@ fi
 # Priority for effective LANG:
 # 1) If LANG explicitly provided (and not C/C. UTF-8), use it (ensure . UTF-8)
 # 2) Else derive LANG from TZ using mapping logic below (only if locale exists)
-# 3) Else fall back to image default LANG or en_GB.UTF-8
+# 3) Else fall back to image default LANG or en_GB. UTF-8
 
 # Image default LANG (set at build time in Dockerfile).  We treat LC_ALL equal to this as "not explicitly provided"
 IMAGE_DEFAULT_LANG="en_GB.UTF-8"
 
-# Helper: normalize locale string to include . UTF-8 suffix if missing
+# Helper: normalize locale string to include .UTF-8 suffix if missing
 _normalize_lang() {
   local l="$1"
   if [ -z "$l" ]; then
     echo ""
     return 0
   fi
-  # If it already contains a dot (i.e. charset), respect it; if user passed e.g. en_US.utf8 normalize to . UTF-8
-  if echo "$l" | grep -qE '\.'; then
+  # If it already contains a dot (i.e.  charset), respect it; if user passed e.g. en_US.utf8 normalize to . UTF-8
+  if echo "$l" | grep -qE '\. '; then
     # Normalize common utf8 variants to UTF-8
-    echo "$l" | sed -E 's/[Uu][Tt][Ff]-? 8/UTF-8/'
+    echo "$l" | sed -E 's/\.[Uu][Tt][Ff]-? 8$/. UTF-8/'
   else
-    echo "${l}.UTF-8"
+    echo "${l}. UTF-8"
   fi
 }
 
@@ -52,23 +52,18 @@ _locale_exists() {
   if [ -z "$want" ]; then
     return 1
   fi
-  local base="${want%%.*}"             # en_US
-  local want_lower
-  want_lower=$(echo "$want" | tr '[:upper:]' '[:lower:]' | sed 's/\. utf-8$//')
   
-  # Check if locale -a command is available and returns results
-  if !  command -v locale >/dev/null 2>&1; then
+  # Check if locale command is available
+  if ! command -v locale >/dev/null 2>&1; then
     echo "Warning: locale command not found, assuming locale exists" >&2
     return 0
   fi
   
-  # Try exact match first (case-insensitive, UTF-8 variants)
-  if locale -a 2>/dev/null | tr '[:upper:]' '[:lower:]' | sed 's/\.utf-8$//' | grep -qx "${want_lower}"; then
-    return 0
-  fi
+  # Get base (e.g., en_NZ from en_NZ.UTF-8)
+  local base="${want%%.*}"
   
-  # Try base match (language_country without charset)
-  if locale -a 2>/dev/null | tr '[:upper:]' '[:lower:]' | sed 's/\..*$//' | grep -qx "${base,,}"; then
+  # Check for exact match or base match (case-insensitive)
+  if locale -a 2>/dev/null | grep -iq "^${want}$\|^${base}$\|^${base}\.utf"; then
     return 0
   fi
   
@@ -76,30 +71,24 @@ _locale_exists() {
 }
 
 # Helper: attempt to find a matching locale string from locale -a and return it (first found)
+# IMPORTANT: Always return with .UTF-8 suffix for consistency
 _find_locale_match() {
   local want="$1"
-  local want_lower
-  want_lower=$(echo "$want" | tr '[:upper:]' '[:lower:]' | sed 's/\.utf-8$//')
   local base="${want%%.*}"
   
-  # Try exact match first (case-insensitive)
-  match="$(locale -a 2>/dev/null | grep -i "^${want_lower}\(\.\|$\)" | head -n1 || true)"
+  # Try to find exact match first (with .UTF-8 or . utf8)
+  match="$(locale -a 2>/dev/null | grep -iE "^${want}$|^${base}\.(utf-?8|UTF-?8)$" | head -n1 || true)"
   if [ -n "$match" ]; then
-    echo "$match"
+    # Normalize the match to always have .UTF-8
+    echo "$match" | sed -E 's/\.[Uu][Tt][Ff]-?8$/.UTF-8/'
     return 0
   fi
   
-  # Try base match with UTF-8
-  match="$(locale -a 2>/dev/null | grep -i "^${base}\. utf" | head -n1 || true)"
+  # Try just base match (e.g., en_NZ without suffix)
+  match="$(locale -a 2>/dev/null | grep -iE "^${base}$" | head -n1 || true)"
   if [ -n "$match" ]; then
-    echo "$match"
-    return 0
-  fi
-  
-  # Try just base match
-  match="$(locale -a 2>/dev/null | grep -i "^${base}$" | head -n1 || true)"
-  if [ -n "$match" ]; then
-    echo "$match"
+    # Add .UTF-8 suffix if base found without it
+    echo "${match}.UTF-8"
     return 0
   fi
   
@@ -112,9 +101,9 @@ _map_tz_to_locale() {
     "Pacific/Auckland"|"NZ"|"Antarctica/McMurdo")
       echo "en_NZ.UTF-8" ;;
     "Australia/Sydney"|"Australia/Melbourne"|"Australia/Brisbane"|"Australia/Perth"|"Australia/Adelaide")
-      echo "en_AU. UTF-8" ;;
+      echo "en_AU.UTF-8" ;;
     "Europe/London"|"Europe/Guernsey"|"Europe/Jersey"|"Europe/Isle_of_Man"|"Europe/Dublin")
-      echo "en_GB.UTF-8" ;;
+      echo "en_GB. UTF-8" ;;
     "America/New_York"|"America/Detroit"|"America/Toronto"|"America/Indiana"*)
       echo "en_US. UTF-8" ;;
     "America/Chicago"|"America/Winnipeg"|"America/Mexico_City")
@@ -153,7 +142,7 @@ effective_lang=""
 
 echo "DEBUG: Initial LANG='$LANG' TZ='$TZ'"
 
-if [ -n "$LANG" ] && [ "$LANG" != "C.UTF-8" ] && [ "$LANG" != "C" ]; then
+if [ -n "$LANG" ] && [ "$LANG" != "C. UTF-8" ] && [ "$LANG" != "C" ]; then
   # User explicitly provided LANG
   echo "User-supplied LANG detected: $LANG"
   tmp_lang=$(_normalize_lang "$LANG")
@@ -208,20 +197,18 @@ if [ -z "$effective_lang" ]; then
   echo "Using image default LANG: $effective_lang"
 fi
 
+# CRITICAL: Ensure effective_lang always has .UTF-8 suffix
+effective_lang=$(_normalize_lang "$effective_lang")
+
 # Export LANG (ensure it's set for the rest of the script/processes)
 export LANG="$effective_lang"
 export LC_ALL="$effective_lang"
 export LC_CTYPE="$effective_lang"
 
-# Export LANGUAGE if not explicitly set: format "<lang_short>:<lang_code>", e.g. en_US:en
-if [ -z "${LANGUAGE+x}" ] || [ -z "$LANGUAGE" ]; then
-  lang_short="${LANG%%.*}"   # en_US
-  lang_code="${lang_short%%_*}" # en
-  export LANGUAGE="${lang_short}:${lang_code}"
-  echo "Setting LANGUAGE to: $LANGUAGE"
-else
-  echo "LANGUAGE is provided in environment: $LANGUAGE"
-fi
+# ALWAYS recalculate LANGUAGE from the effective LANG (don't trust environment)
+lang_short="${LANG%%.*}"   # en_NZ
+lang_code="${lang_short%%_*}" # en
+export LANGUAGE="${lang_short}:${lang_code}"
 
 echo "=== Final locale settings ==="
 echo "LANG=$LANG"
@@ -256,7 +243,7 @@ if command -v locale-gen >/dev/null 2>&1; then
   locale-gen "$LANG" 2>/dev/null || echo "Warning: locale-gen failed, continuing anyway"
 fi
 
-# Ensure .NET uses system globalization AFTER locale is set
+# Ensure . NET uses system globalization AFTER locale is set
 export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=${DOTNET_SYSTEM_GLOBALIZATION_INVARIANT:-false}
 
 # --- End runtime locale handling ---
