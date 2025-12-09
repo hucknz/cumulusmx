@@ -9,7 +9,7 @@
 #
 
 # Pull base image
-FROM mcr.microsoft.com/dotnet/runtime:8.0
+FROM mcr.microsoft.com/dotnet/runtime:10.0
 LABEL Maintainer="hucknz"
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -46,7 +46,7 @@ ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 ARG CACHEBUST=1
 
 # Download & install CumulusMX
-RUN curl -L $(curl -s https://api.github.com/repos/cumulusmx/CumulusMX/releases/latest | grep browser_ | cut -d\" -f4) --output /tmp/CumulusMX.zip && \
+RUN RUN curl -L https://github.com/cumulusmx/CumulusMX/releases/download/b4133/CumulusMXBeta4133.zip --output /tmp/CumulusMX.zip && \
     mkdir -p /opt/CumulusMX/publicweb /tmp/web && \
     unzip /tmp/CumulusMX.zip -d /opt/ && \
     chmod +x /opt/CumulusMX/CumulusMX.exe || true && \
