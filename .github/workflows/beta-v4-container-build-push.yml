@@ -22,7 +22,7 @@ jobs:
       - name: Get latest version number
         id: get_version
         run: |
-          VER=$(grep "^cumulusmx_version=" .version | cut -d'=' -f2)
+          VER="b4133"
           echo "VERSION=$VER" >> $GITHUB_ENV
         
       - name: Set up QEMU
