@@ -46,7 +46,7 @@ ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 ARG CACHEBUST=1
 
 # Download & install CumulusMX
-RUN curl -L https://github.com/cumulusmx/CumulusMX/releases/download/b4137/CumulusMXBeta4137.zip --output /tmp/CumulusMX.zip && \
+RUN curl -L https://github.com/cumulusmx/CumulusMX/archive/refs/tags/b4138.zip --output /tmp/CumulusMX.zip && \
     mkdir -p /opt/CumulusMX/publicweb /tmp/web && \
     unzip /tmp/CumulusMX.zip -d /opt/ && \
     chmod +x /opt/CumulusMX/CumulusMX.exe || true && \
