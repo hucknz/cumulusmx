@@ -22,7 +22,7 @@ jobs:
       - name: Get latest version number
         id: get_version
         run: |
-          VER="b4138"
+          VER="b4139"
           echo "VERSION=$VER" >> $GITHUB_ENV
         
       - name: Set up QEMU
