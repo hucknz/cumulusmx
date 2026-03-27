@@ -27,7 +27,7 @@ jobs:
       - name: Get previous hash
         id: get_previous_hash
         run: |
-          PREVIOUS_HASH=$(grep "dotnet_digest" .version | cut -d'=' -f2)
+          PREVIOUS_HASH=$(grep "dotnet_10_digest" .version | cut -d'=' -f2)
           echo "PREVIOUS_HASH=$PREVIOUS_HASH" >> $GITHUB_ENV
 
       - name: Compare hashes
@@ -39,7 +39,7 @@ jobs:
               echo "MODIFIED=false" >> $GITHUB_ENV
             else
               echo "Hashes differ. There's a change in the image."
-              sed -i "s/^dotnet_digest=.*/dotnet_digest=${{ env.CURRENT_HASH }}/" .version
+              sed -i "s/^dotnet_10_digest=.*/dotnet_10_digest=${{ env.CURRENT_HASH }}/" .version
               curl -X POST \
               -H "Accept: application/vnd.github.v3+json" \
               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
@@ -49,7 +49,7 @@ jobs:
             fi
           else
             echo "Previous hash not found. This is likely the first run."
-            sed -i "s/^dotnet_digest=.*/dotnet_digest=${{ env.CURRENT_HASH }}/" .version
+            sed -i "s/^dotnet_10_digest=.*/dotnet_10_digest=${{ env.CURRENT_HASH }}/" .version
             echo "MODIFIED=true" >> $GITHUB_ENV
           fi
 
@@ -59,7 +59,7 @@ jobs:
         run: |
           git config --global user.name 'hucknz'
           git config --global user.email '12265772+hucknz@users.noreply.github.com'
-          git commit -am "New dotnet hash found"
+          git commit -am "New dotnet 10 hash found"
           git push
 
       - name: Notify new image found
