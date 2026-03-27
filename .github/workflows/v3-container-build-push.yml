@@ -9,7 +9,7 @@ on:
 
 jobs:
   build_and_push:
-    name: v3 monthly build and push
+    name: v3 build and push
     runs-on: ubuntu-latest
     permissions:
       packages: write

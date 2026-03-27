@@ -1,15 +1,14 @@
-name: v4 build and push
+name: v5 build and push
 
-# This workflow is triggered by an update to the base image.
+# This workflow is triggered by an update to the upstream-releases file (which is triggered by the check-releases workflow).
 # When triggered the latest version of the container is built and pushed to docker hub
 
 on:
   workflow_dispatch:
 
-
 jobs:
   build_and_push:
-    name: v4 build and push
+    name: v5 build and push
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -17,8 +16,14 @@ jobs:
     steps:
 
       - name: Check out the repo
-        id: checkout
+        id: checkout_repository
         uses: actions/checkout@v4
+
+      - name: Get latest version number
+        id: get_version
+        run: |
+          VER=$(grep "^cumulusmx_version=" .version | cut -d'=' -f2)
+          echo "VERSION=$VER" >> $GITHUB_ENV
         
       - name: Set up QEMU
         id: setup_qemu
@@ -51,14 +56,15 @@ jobs:
             hucknz/cumulusmx
             ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=b4128
-            type=raw,value=v4
+            type=raw,value=${{ env.VERSION }}
+            type=raw,value=v5
+            type=raw,value=latest
 
       - name: Build and push Docker images
         id: build_images
         uses: docker/build-push-action@v5
         with:
-          context: v3
+          context: v5
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.extract_metadata.outputs.tags }}
