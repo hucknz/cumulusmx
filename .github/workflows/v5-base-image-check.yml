@@ -2,7 +2,7 @@ name: Check for new dotnet 10 image
 
 on:
   schedule:
-    - cron:  '12 19 * * *'
+    - cron:  '22 19 * * *'
 
   workflow_dispatch:
 
