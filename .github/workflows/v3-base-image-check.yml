@@ -2,7 +2,7 @@ name: Check for new Ubuntu image
 
 on:
   schedule:
-    - cron:  '12 19 * * *'
+    - cron:  '02 19 * * *'
 
   workflow_dispatch:
 
