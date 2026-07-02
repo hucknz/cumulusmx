@@ -11,13 +11,15 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=ETC/UTC
 SHELL ["/bin/bash", "-c"]
 
-# Install packages, configure packages then download and install CumulusMX
+# Install packages
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    nginx mono-complete curl tzdata unzip libudev-dev && \
+    nginx mono-complete curl tzdata unzip libudev-dev ca-certificates && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Configure packages then download and install CumulusMX
+RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
     chown -R www-data:www-data /var/lib/nginx && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
