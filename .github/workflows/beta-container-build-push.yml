@@ -57,13 +57,13 @@ jobs:
             ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=beta-${{ env.VERSION }}
-            type=raw,value=v5-beta
+            type=raw,value=beta
 
       - name: Build and push Docker images
         id: build_images
         uses: docker/build-push-action@v5
         with:
-          context: v5-beta
+          context: beta
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.extract_metadata.outputs.tags }}
