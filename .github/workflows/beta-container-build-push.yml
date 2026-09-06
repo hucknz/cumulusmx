@@ -1,4 +1,4 @@
-name: v5 build and push
+name: beta build and push
 
 # This workflow is triggered by an update to the upstream-releases file (which is triggered by the check-releases workflow).
 # When triggered the latest version of the container is built and pushed to docker hub
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build_and_push:
-    name: v5 build and push
+    name: beta build and push
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -16,13 +16,13 @@ jobs:
     steps:
 
       - name: Check out the repo
-        id: checkout_repository
+        id: checkout
         uses: actions/checkout@v4
 
       - name: Get latest version number
         id: get_version
         run: |
-          VER=$(grep "^cumulusmx_version=" .version | cut -d'=' -f2)
+          VER="b5014"
           echo "VERSION=$VER" >> $GITHUB_ENV
         
       - name: Set up QEMU
@@ -40,7 +40,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Log in to the ghcr.io
+      - name: Log in to ghcr.io
         id: authenticate_ghcr
         uses: docker/login-action@v3
         with:
@@ -56,15 +56,14 @@ jobs:
             hucknz/cumulusmx
             ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=${{ env.VERSION }}
-            type=raw,value=v5
-            type=raw,value=latest
+            type=raw,value=beta-${{ env.VERSION }}
+            type=raw,value=v5-beta
 
       - name: Build and push Docker images
         id: build_images
         uses: docker/build-push-action@v5
         with:
-          context: v5
+          context: v5-beta
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.extract_metadata.outputs.tags }}

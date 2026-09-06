@@ -4,7 +4,7 @@
 Cumulus MX is a cross platform version of the Cumulus weather station software. [Learn more](https://www.cumuluswiki.org/a/Main_Page) at the Cumulus wiki.
 
 ## Usage
-1. Ensure Docker is installed and configured on the host machine (I recommend using DockSTARTer if you want an easy way to get started with Docker)
+1. Ensure Docker is installed and configured on the host machine
 2. Clone the [docker-compose.yml](https://github.com/hucknz/cumulusmx/blob/main/docker-compose.yml) and [.env](https://github.com/hucknz/cumulusmx/blob/main/.env) files to your local machine
 3. Modify the .env file to suit your environment
 4. Important: If you're not using USB passthrough make sure to remove the "devices" section from the docker-compose.yml file (see Known Issues)
@@ -31,13 +31,9 @@ Note: config changes won't be committed to the INI file outside the container un
 * CumulusMX does not work well with mapped ports. If you need to run on a different port use the `PORT=` environment variable and ensure the CumulusMX port and the docker port are the same. 
 
 # Container builds
-The upstream repo for Cumulus MX is checked daily for new releases. When a new release is identified the build process should automatically trigger and commit a new build to https://hub.docker.com/r/hucknz/cumulusmx and https://ghcr.io/hucknz/cumulusmx. You can use the v3 or v4 tags to get the latest build of each version. The latest tag is currently mapped to v4. 
+The upstream repo for Cumulus MX is checked daily for new releases. When a new release is identified the build process should automatically trigger and commit a new build to https://hub.docker.com/r/hucknz/cumulusmx and https://ghcr.io/hucknz/cumulusmx. You can use the v3,v4 or v5 tags to get the latest build of each version. The latest tag is currently mapped to v5. 
 
 # Important changes for v4 #
-
-**The `cumulusmx:latest` tag is now running CumulusMX v4 as of 9 July 2024.**
-
-`cumulusmx:v3` will remain available for version 3 builds. These will be updated regularly to avoid the containers going stale or security flaws being left open. 
 
 **Please ensure you back up your data files before updating to v4. I can not guarantee the migration will work correctly for you.**
 
