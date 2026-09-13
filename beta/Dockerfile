@@ -47,7 +47,7 @@ ARG CACHEBUST=1
 ARG CUMULUSMX_VERSION=b5014
 
 # Download & install CumulusMX
-RUN curl -L https://github.com/cumulusmx/CumulusMX/releases/download/${CUMULUSMX_VERSION}/CumulusMXBeta${CUMULUSMX_VERSION}.zip --output /tmp/CumulusMX.zip && \
+RUN curl -L https://github.com/cumulusmx/CumulusMX/releases/download/${CUMULUSMX_VERSION}/CumulusMXBeta${CUMULUSMX_VERSION#b}.zip --output /tmp/CumulusMX.zip && \
     mkdir -p /opt/CumulusMX/publicweb /tmp/web && \
     unzip /tmp/CumulusMX.zip -d /opt/ && \
     chmod +x /opt/CumulusMX/CumulusMX.exe || true && \
