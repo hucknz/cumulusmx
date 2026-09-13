@@ -23,6 +23,7 @@ jobs:
         id: get_version
         run: |
           VER=$(grep "^cumulusmx_beta_version=" .version | cut -d'=' -f2)
+          echo "VERSION=$VER" >> $GITHUB_OUTPUT
           echo "VERSION=$VER" >> $GITHUB_ENV
         
       - name: Set up QEMU
@@ -68,8 +69,7 @@ jobs:
           push: true
           tags: ${{ steps.extract_metadata.outputs.tags }}
           labels: ${{ steps.extract_metadata.outputs.labels }}
-          build-args: |
-            CUMULUSMX_VERSION=${{ env.VERSION }}
+          build-args: CUMULUSMX_VERSION=${{ steps.get_version.outputs.VERSION }}
 
       - name: Notify outcome
         id: notify
