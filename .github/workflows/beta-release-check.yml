@@ -1,0 +1,87 @@
+name: Check for new CumulusMX beta release
+
+# This script runs on a schedule to check for new pre-releases from the upstream repo.
+# If it finds a new beta release, it writes the latest beta release number to a file.
+
+on:
+  schedule:
+    - cron:  '21 19 * * *'
+
+  workflow_dispatch:
+
+jobs:
+  get-beta-version:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+  
+      - name: Get current beta version number
+        id: get_current_beta_version
+        run: |
+          RELEASE_DATA=$(curl -sL "https://api.github.com/repos/cumulusmx/CumulusMX/releases" 2>/dev/null | jq '.[] | select(.prerelease == true) | .tag_name' | head -1 | tr -d '"')
+          CURRENT_BETA_VERSION=$RELEASE_DATA
+          echo "CURRENT_BETA_VERSION=$CURRENT_BETA_VERSION" >> $GITHUB_ENV
+
+      - name: Get previous beta version number
+        id: get_previous_beta_version
+        run: |
+          PREVIOUS_BETA_VERSION=$(grep "cumulusmx_beta_version" .version | cut -d'=' -f2)
+          echo "PREVIOUS_BETA_VERSION=$PREVIOUS_BETA_VERSION" >> $GITHUB_ENV
+
+      - name: Compare beta versions
+        id: compare_beta_versions
+        run: |
+          if [ -z "${{ env.CURRENT_BETA_VERSION }}" ] || [ "${{ env.CURRENT_BETA_VERSION }}" = "null" ]; then
+            echo "No valid new beta version found. Skipping update."
+            echo "MODIFIED=false" >> $GITHUB_ENV
+          elif [ -n "${{ env.PREVIOUS_BETA_VERSION }}" ]; then
+            if [ "${{ env.PREVIOUS_BETA_VERSION }}" = "${{ env.CURRENT_BETA_VERSION }}" ]; then
+              echo "Beta versions match. No change detected."
+              echo "MODIFIED=false" >> $GITHUB_ENV
+            else
+              echo "Beta versions differ. There has been a new beta release."
+              sed -i "s/^cumulusmx_beta_version=.*/cumulusmx_beta_version=${{ env.CURRENT_BETA_VERSION }}/" .version
+              curl -X POST \
+                -H "Accept: application/vnd.github.v3+json" \
+                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                https://api.github.com/repos/hucknz/cumulusmx/actions/workflows/beta-container-build-push.yml/dispatches \
+                -d '{"ref":"main"}'
+              echo "MODIFIED=true" >> $GITHUB_ENV
+            fi
+          else
+            echo "Previous beta version not found. This is likely the first run."
+            sed -i "s/^cumulusmx_beta_version=.*/cumulusmx_beta_version=${{ env.CURRENT_BETA_VERSION }}/" .version
+            echo "MODIFIED=true" >> $GITHUB_ENV
+          fi
+
+      - name: Commit latest beta version
+        if: env.MODIFIED == 'true'
+        run: |
+          git config --global user.name 'hucknz'
+          git config --global user.email '12265772+hucknz@users.noreply.github.com'
+          git commit -am "New beta release version found"
+          git push
+  
+      - name: Notify new beta version found
+        id: notify_current_beta_version
+        if: env.MODIFIED == 'true'
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          noprefix: true
+          status: ${{ job.status }}
+          title: ${{ github.workflow}} ${{ job.status }}
+          description: "A new CumulusMX beta version was found. The build and push workflow has been triggered."
+      
+      - name: Notify failure
+        id: notify_failure
+        if: failure()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          noprefix: true
+          status: ${{ job.status }}
+          title: "CumulusMX beta release check ${{ job.status }}"
